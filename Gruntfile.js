@@ -18,8 +18,7 @@ module.exports = function(grunt) {
             }
         },
         exec: {
-            tsc: './node_modules/typescript/bin/tsc',
-            webpack: './node_modules/.bin/webpack'
+            tsc: './node_modules/typescript/bin/tsc'
         },
         tslint: {
             options: {
