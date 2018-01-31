@@ -18,7 +18,9 @@ module.exports = function(grunt) {
             }
         },
         exec: {
-            tsc: './node_modules/typescript/bin/tsc'
+            tsc: './node_modules/typescript/bin/tsc',
+            webpack: './node_modules/.bin/webpack',
+            mocha: './node_modules/mocha/bin/mocha'
         },
         tslint: {
             options: {
@@ -49,6 +51,6 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-watch');
 
     // Default task(s).
-    grunt.registerTask('build', ['tslint', 'exec', 'clean:build', 'uglify'])
+    grunt.registerTask('build', ['tslint', 'exec',  'uglify'])
     grunt.registerTask('default', ['build']);
   };
