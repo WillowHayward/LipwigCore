@@ -11,6 +11,19 @@ describe('EventManager', function() {
             a.emit('test');
         });
 
+        it('should allow events to be triggered multiple times', function() {
+            let count = 0;
+            const a = new EventManager();
+            a.on('add', function() {
+                count++;
+            });
+
+            a.emit('add');
+            a.emit('add');
+
+            assert.equal(count, 2);
+        });
+
         it('should not trigger non-existent events', function() {
             const a = new EventManager();
             a.emit('test');
@@ -50,7 +63,7 @@ describe('EventManager', function() {
             
             assert.equal(count, 2);
         });
-        
+
         it('should not share events between managers', function() {
             let count = 0;
             const a = new EventManager();
@@ -67,5 +80,63 @@ describe('EventManager', function() {
             
             assert.equal(count, 1);
         });
+
+        it('should allow multiple functions within the same event', function() {
+            var count1 = 0;
+            var count2 = 0;
+            const a = new EventManager();
+            a.on('add', function() {
+                count1++;
+            });
+
+            a.on('add', function() {
+                count2++;
+            });
+
+            a.emit('add');
+
+            assert.equal(count1, 1);
+            assert.equal(count2, 1);
+        });
+    });
+    describe('#once()', function() {
+        it('should trigger saved events', function(done) {
+            const a = new EventManager();
+            a.once('test', function() {
+                done();
+            });
+
+            a.emit('test');
+        });
+        
+        it('should trigger saved events exactly once', function() {
+            let count = 0;
+            const a = new EventManager();
+            a.once('add', function() {
+                count++;
+            });
+
+            a.emit('add');
+            a.emit('add');
+
+            assert.equal(count, 1);
+        });
+
+        it('should pair with .on() without replacing it', function() {
+            let count = 0;
+            const a = new EventManager();
+            a.once('double', function() {
+                count *= 2;
+            });
+            
+            a.on('add', function() {
+                count++;
+            });
+
+            a.emit('add');
+            a.emit('double');
+            a.emit('double');
+            assert.equal(count, 2);
+        })
     });
   });
