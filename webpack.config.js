@@ -1,6 +1,6 @@
 const config = {
     entry: {
-      final: './build/final.js'
+      Lipwig: './build/Lipwig.js'
     },
     output: {
       filename: '[name].js',
