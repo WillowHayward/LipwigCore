@@ -160,7 +160,7 @@
       "no-require-imports": true,
       "no-return-await": true,
       "no-shadowed-variable": true,
-      "no-suspicious-comment": true,
+      "no-suspicious-comment": false,
       "no-this-assignment": true,
       "no-typeof-undefined": true,
       "no-unnecessary-class": true,
