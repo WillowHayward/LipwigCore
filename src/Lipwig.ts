@@ -14,3 +14,5 @@ export class Lipwig {
         return;
     }
 }
+
+const lw: Lipwig = new Lipwig();
