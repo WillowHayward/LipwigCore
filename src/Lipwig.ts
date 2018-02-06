@@ -22,7 +22,7 @@ export class Lipwig {
     }
 
     private newRequest(request: WebSocket.request): void {
-
+        return;
     }
 
     private isOriginAllowed(origin: string): boolean {

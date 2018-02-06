@@ -3,5 +3,7 @@
  */
 import {EventManager} from './EventManager';
 export class Room extends EventManager {
-
+    constructor() {
+        super();
+    }
 }

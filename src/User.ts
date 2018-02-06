@@ -3,5 +3,7 @@
  */
 import {EventManager} from './EventManager';
 export class User extends EventManager {
-
+    constructor() {
+        super();
+    }
 }
