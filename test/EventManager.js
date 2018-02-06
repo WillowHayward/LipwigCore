@@ -95,6 +95,20 @@ describe('EventManager', function() {
             assert.equal(count1, 1);
             assert.equal(count2, 1);
         });
+
+        it('should maintain the order of events as added', function() {
+            manager.on('change', function() {
+                count++;
+            });
+
+            manager.on('change', function() {
+                count *= 10;
+            });
+
+            manager.emit('change');
+
+            assert.equal(count, 10);
+        });
     });
     describe('#once()', function() {
         it('should trigger saved events', function(done) {
@@ -129,7 +143,7 @@ describe('EventManager', function() {
             manager.emit('double');
             manager.emit('double');
             assert.equal(count, 2);
-        })
+        });
     });
     describe('#emit()', function() {
         it('should do nothing without event to trigger', function() {
