@@ -1,82 +1,79 @@
 var assert = require('assert');
 const EventManager = require('../build/EventManager.js').EventManager;
+let manager = null;
+let count = 0;
 describe('EventManager', function() {
+    beforeEach(function() {
+        manager = new EventManager();
+        count = 0;
+    });
+
     describe('#on()', function() {
         it('should trigger saved events', function(done) {
-            const a = new EventManager();
-            a.on('test', function() {
+            manager.on('test', function() {
                 done();
             });
 
-            a.emit('test');
+            manager.emit('test');
         });
 
         it('should allow events to be triggered multiple times', function() {
-            let count = 0;
-            const a = new EventManager();
-            a.on('add', function() {
+            manager.on('add', function() {
                 count++;
             });
 
-            a.emit('add');
-            a.emit('add');
+            manager.emit('add');
+            manager.emit('add');
 
             assert.equal(count, 2);
         });
 
         it('should not trigger non-existent events', function() {
-            const a = new EventManager();
-            a.emit('test');
+            manager.emit('test');
         });
 
         it('should allow multiple events to be triggered', function() {
-            let count = 0;
-            const a = new EventManager();
-            a.on('first', function() {
+            manager.on('first', function() {
                 count++;
             });
 
-            a.on('second', function() {
+            manager.on('second', function() {
                 count++;
             });
 
-            a.emit('first');
-            a.emit('second');
+            manager.emit('first');
+            manager.emit('second');
 
             assert.equal(count, 2);
         });
 
         it('should allow events to be triggered from different event managers', function() {
-            let count = 0;
-            const a = new EventManager();
-            const b = new EventManager();
-            a.on('increment', function() {
+            const secondManager = new EventManager();
+            manager.on('increment', function() {
                 count++;
             });
 
-            b.on('add', function() {
+            secondManager.on('add', function() {
                 count++;
             });
 
-            a.emit('increment');
-            b.emit('add');
+            manager.emit('increment');
+            secondManager.emit('add');
             
             assert.equal(count, 2);
         });
 
         it('should not share events between managers', function() {
-            let count = 0;
-            const a = new EventManager();
-            const b = new EventManager();
-            a.on('add', function() {
+            const secondManager = new EventManager();
+            manager.on('add', function() {
                 count++;
             });
 
-            b.on('add', function() {
+            secondManager.on('add', function() {
                 count++;
             });
 
-            a.emit('add');
+            manager.emit('add');
             
             assert.equal(count, 1);
         });
@@ -84,16 +81,16 @@ describe('EventManager', function() {
         it('should allow multiple functions within the same event', function() {
             var count1 = 0;
             var count2 = 0;
-            const a = new EventManager();
-            a.on('add', function() {
+
+            manager.on('add', function() {
                 count1++;
             });
 
-            a.on('add', function() {
+            manager.on('add', function() {
                 count2++;
             });
 
-            a.emit('add');
+            manager.emit('add');
 
             assert.equal(count1, 1);
             assert.equal(count2, 1);
@@ -101,41 +98,36 @@ describe('EventManager', function() {
     });
     describe('#once()', function() {
         it('should trigger saved events', function(done) {
-            const a = new EventManager();
-            a.once('test', function() {
+            manager.once('test', function() {
                 done();
             });
 
-            a.emit('test');
+            manager.emit('test');
         });
         
         it('should trigger saved events exactly once', function() {
-            let count = 0;
-            const a = new EventManager();
-            a.once('add', function() {
+            manager.once('add', function() {
                 count++;
             });
 
-            a.emit('add');
-            a.emit('add');
+            manager.emit('add');
+            manager.emit('add');
 
             assert.equal(count, 1);
         });
 
         it('should pair with .on() without replacing it', function() {
-            let count = 0;
-            const a = new EventManager();
-            a.once('double', function() {
+            manager.once('double', function() {
                 count *= 2;
             });
             
-            a.on('add', function() {
+            manager.on('add', function() {
                 count++;
             });
 
-            a.emit('add');
-            a.emit('double');
-            a.emit('double');
+            manager.emit('add');
+            manager.emit('double');
+            manager.emit('double');
             assert.equal(count, 2);
         })
     });
