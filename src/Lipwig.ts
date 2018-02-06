@@ -3,8 +3,8 @@
  */
 import * as http from 'http';
 import * as WebSocket from 'websocket';
-import {Room} from './Room';
-import {User} from './User';
+import { Room } from './Room';
+import { User } from './User';
 export class Lipwig {
     private ws: WebSocket.server;
     constructor(port: number = 8080) {
