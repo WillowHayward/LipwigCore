@@ -1,6 +1,6 @@
 {
     "rules": {
-      "insecure-random": true,
+      "insecure-random": false,
       "no-banned-terms": true,
       "no-cookies": true,
       "no-delete-expression": true,
