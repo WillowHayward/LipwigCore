@@ -2,7 +2,6 @@
  * @author: William Hayward
  */
 import * as WebSocket from 'websocket';
-import { EventManager } from './EventManager';
 
 type Message = {
     event: string;
@@ -11,11 +10,10 @@ type Message = {
     sender: string;
 };
 
-export class User extends EventManager {
+export class User {
     private id: string;
     private socket: WebSocket.connection;
     constructor(id: string, socket: WebSocket.connection) {
-        super();
         this.id = id;
         this.socket = socket;
     }

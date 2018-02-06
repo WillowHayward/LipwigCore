@@ -3,7 +3,6 @@
  */
 import { connection as WebSocketConnection } from 'websocket'; // TODO: This is just for the types, not used at any point
 import { ErrorCode } from './ErrorCode';
-import { EventManager } from './EventManager';
 import { User } from './User';
 import { Utility } from './Utility';
 
@@ -18,7 +17,7 @@ type Message = {
     sender: string;
 };
 
-export class Room extends EventManager {
+export class Room {
     // TODO: These are the properties. Make this a constructor parameter
     private maxSize: number = 9;
     private host: User;
@@ -26,7 +25,6 @@ export class Room extends EventManager {
     private users: UserMap;
     private id: string;
     constructor(id: string, host: WebSocketConnection) {
-        super();
         this.id = id;
         this.users = {};
         if (host !== undefined) {
