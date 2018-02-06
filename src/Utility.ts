@@ -3,7 +3,7 @@
  */
 const alphabet: string = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 export namespace Utility {
-    const generateString: Function = (length: number = 4, characters: string = alphabet): string => {
+    export const generateString: Function = (length: number = 4, characters: string = alphabet): string => {
         if (characters.length === 0) {
             return '';
         }

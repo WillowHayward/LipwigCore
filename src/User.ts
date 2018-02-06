@@ -3,7 +3,13 @@
  */
 import { EventManager } from './EventManager';
 export class User extends EventManager {
-    constructor() {
+    private id: string;
+    constructor(id: string) {
         super();
+        this.id = id;
+    }
+
+    public getID(): string {
+        return this.id;
     }
 }
