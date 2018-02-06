@@ -131,4 +131,49 @@ describe('EventManager', function() {
             assert.equal(count, 2);
         })
     });
+    describe('#emit()', function() {
+        it('should do nothing without event to trigger', function() {
+            manager.on('add', function() {
+                count++;
+            });
+            
+            manager.emit();
+        })
+        it('should emit without function parameters', function() {
+            manager.on('add', function() {
+                count++;
+            });
+            manager.emit('add');
+
+            assert.equal(count, 1);
+        });
+        it('should allow parameters to be passed', function() {
+            manager.on('add', function(amount) {
+                count += amount;
+            })
+
+            manager.emit('add', 5);
+
+            assert.equal(count, 5);
+        });
+
+        it('should allow optional parameters', function() {
+            manager.on('add', function(amount = 1) {
+                count += amount;
+            });
+
+            manager.emit('add');
+            assert.equal(count, 1);
+        });
+
+        it('should allow multiple parameters', function() {
+            manager.on('add', function(first, second) {
+                count += first;
+                count += second;
+            });
+
+            manager.emit('add', 1, 3);
+            assert.equal(count, 4);
+        })
+    });
   });
