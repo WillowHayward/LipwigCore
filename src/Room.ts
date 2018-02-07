@@ -58,6 +58,7 @@ export class Room {
                 recipient: ['']
             };
             user.send(message);
+            this.host.send(message);
         }
 
         return error;
@@ -91,8 +92,10 @@ export class Room {
     public route(message: Message): ErrorCode {
         const users: User[] = [];
         let missingUser: boolean = false;
-        if (message.sender === this.host.getID()) {
+        if (message.sender !== this.host.getID()) {
             this.host.send(message);
+
+            return ErrorCode.SUCCESS;
         }
 
         message.recipient.forEach((id: string) => {
