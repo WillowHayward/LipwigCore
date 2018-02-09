@@ -23,6 +23,7 @@ export class User {
     }
 
     public send(message: Message): void {
-        this.socket.send(message);
+        const text: string = JSON.stringify(message);
+        this.socket.sendUTF(text);
     }
 }

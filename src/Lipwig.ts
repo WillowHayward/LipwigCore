@@ -42,7 +42,9 @@ export class Lipwig {
             autoAcceptConnections: false
         });
 
-        this.ws.on('request', this.newRequest);
+        this.ws.on('request', (request: WebSocket.request): void => {
+            this.newRequest(request);
+        });
 
         this.rooms = {};
     }
@@ -54,11 +56,12 @@ export class Lipwig {
             return;
         }
 
-        const connection: WebSocket.connection = request.accept('echo-protocol', request.origin);
+        const connection: WebSocket.connection = request.accept(request.requestedProtocols[0], request.origin);
         connection.on('message', (message: WebSocketMessage): void => {
+            const text: string = message.utf8Data.toString();
             let parsed: Message;
             try {
-                parsed = JSON.parse(message.utf8Data);
+                parsed = JSON.parse(text);
             } catch (error) {
                 connection.send(ErrorCode.MALFORMED); // TODO: Determine a numerical system for errors/messages
 
@@ -83,11 +86,11 @@ export class Lipwig {
             case 'create':
                 message.data.unshift(connection);
 
-                return this.create.apply(message.data);
+                return this.create.apply(this, message.data);
             case 'join':
                 message.data.unshift(connection);
 
-                return this.join.apply(message.data);
+                return this.join.apply(this, message.data);
             default:
                 return this.route(message);
         }
