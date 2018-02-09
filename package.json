@@ -1,10 +1,14 @@
 {
   "name": "lipwig",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "",
   "main": "lib/Lipwig.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/WilliamHayward/LipwigCore.git"
   },
   "keywords": [],
   "author": "William Hayward",

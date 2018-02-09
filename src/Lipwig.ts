@@ -131,3 +131,5 @@ export class Lipwig {
 }
 
 const lw: Lipwig = new Lipwig();
+
+module.exports = Lipwig;
