@@ -17,7 +17,7 @@ module.exports = function(grunt) {
             }
         },
         clean: {
-            build: ['build']
+            build: ['lib']
         },
         watch: {
             scripts: {

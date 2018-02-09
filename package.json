@@ -1,13 +1,13 @@
 {
-  "name": "lipwig-core",
-  "version": "1.0.0",
+  "name": "lipwig",
+  "version": "0.3.0",
   "description": "",
-  "main": "index.js",
+  "main": "lib/Lipwig.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
-  "author": "",
+  "author": "William Hayward",
   "license": "ISC",
   "devDependencies": {
     "@types/websocket": "0.0.36",
