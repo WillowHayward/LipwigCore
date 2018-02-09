@@ -28,7 +28,7 @@ type RoomOptions = {
     size: number;
 };
 
-export class Lipwig {
+class Lipwig {
     private ws: WebSocket.server;
     private rooms: RoomMap;
     constructor(port: number = 8080) {
@@ -129,7 +129,5 @@ export class Lipwig {
         return room.join(connection);
     }
 }
-
-const lw: Lipwig = new Lipwig();
 
 module.exports = Lipwig;

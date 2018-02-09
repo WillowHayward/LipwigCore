@@ -1,0 +1,7 @@
+#!/usr/bin/env node
+
+"use strict"
+process.title = 'lipwig';
+
+const Lipwig = require('../lib/Lipwig.js');
+const lipwig = new Lipwig();
