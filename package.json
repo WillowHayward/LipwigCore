@@ -3,6 +3,9 @@
   "version": "0.3.4",
   "description": "",
   "main": "lib/Lipwig.js",
+  "bin": {
+    "lipwig": "./bin/lipwig"
+  },
   "scripts": {
     "test": "mocha"
   },
