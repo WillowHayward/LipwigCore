@@ -32,10 +32,8 @@ And then added to a NodeJS project with
 
     var lipwig = new Lipwig();
 
-To start developing users for Lipwig, you'll need to use the [Lipwig JavaScript library](https://github.com/WilliamHayward/LipwigJS)
-
-# Running from commandline
-
 Lipwig can also be run from commandline by installing lipwig globally using `npm install lipwig -g`
 
 Then you can start the server using `lipwig` in your commandline.
+
+To start developing users for Lipwig, you'll need to use the [Lipwig JavaScript library](https://github.com/WilliamHayward/LipwigJS)
