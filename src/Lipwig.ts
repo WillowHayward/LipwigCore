@@ -49,6 +49,10 @@ class Lipwig {
         this.rooms = {};
     }
 
+    public exit(code: number = 0): void {
+        process.exit(code);
+    }
+
     private newRequest(request: WebSocket.request): void {
         if (!this.isOriginAllowed(request.origin)) {
             request.reject();
