@@ -92,14 +92,15 @@ export class Room {
     public route(message: Message): ErrorCode {
         const users: User[] = [];
         let missingUser: boolean = false;
-        if (message.sender !== this.host.getID()) {
+        if (message.sender !== this.id) {
             this.host.send(message);
 
             return ErrorCode.SUCCESS;
         }
 
         message.recipient.forEach((id: string) => {
-            const userID: string = id.slice(4, 7);
+
+            const userID: string = id.slice(4, 8);
             const user: User = this.users[userID];
 
             if (user === undefined) {

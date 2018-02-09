@@ -104,7 +104,7 @@ export class Lipwig {
             return ErrorCode.ROOMNOTFOUND;
         }
 
-        return ErrorCode.SUCCESS;
+        return room.route(message);
     }
 
     private create(connection: WebSocket.connection, options?: RoomOptions): ErrorCode {
