@@ -26,4 +26,8 @@ export class User {
         const text: string = JSON.stringify(message);
         this.socket.sendUTF(text);
     }
+
+    public reconnect(socket: WebSocket.connection): void {
+        this.socket = socket;
+    }
 }

@@ -95,20 +95,13 @@ class Lipwig {
                 message.data.unshift(connection);
 
                 return this.join.apply(this, message.data);
+            case 'reconnect':
+                message.data.unshift(connection);
+
+                return this.reconnect.apply(this, message.data);
             default:
                 return this.route(message);
         }
-    }
-
-    private route(message: Message): ErrorCode {
-        const roomID: string = message.sender.slice(0, 4);
-        const room: Room = this.rooms[roomID];
-
-        if (room === undefined) {
-            return ErrorCode.ROOMNOTFOUND;
-        }
-
-        return room.route(message);
     }
 
     private create(connection: WebSocket.connection, options?: RoomOptions): ErrorCode {
@@ -131,6 +124,28 @@ class Lipwig {
         }
 
         return room.join(connection);
+    }
+
+    private reconnect(connection: WebSocket.connection, id: string): ErrorCode {
+        const code: string = id.slice(0, 4);
+        const room: Room = this.rooms[code];
+
+        if (room === undefined) {
+            return ErrorCode.ROOMNOTFOUND;
+        }
+
+        return room.reconnect(connection, id);
+    }
+
+    private route(message: Message): ErrorCode {
+        const roomID: string = message.sender.slice(0, 4);
+        const room: Room = this.rooms[roomID];
+
+        if (room === undefined) {
+            return ErrorCode.ROOMNOTFOUND;
+        }
+
+        return room.route(message);
     }
 }
 
