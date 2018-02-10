@@ -90,15 +90,6 @@ export class Room {
 
         user.reconnect(connection);
 
-        const message: Message = {
-            event: 'reconnected',
-            data: [],
-            sender: this.id,
-            recipient: []
-        };
-
-        user.send(message);
-
         return ErrorCode.SUCCESS;
     }
 
