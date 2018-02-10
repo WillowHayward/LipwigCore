@@ -42,6 +42,15 @@ export class User {
     public reconnect(socket: WebSocket.connection): void {
         this.socket = socket;
 
+        const reconnect: Message = {
+            event: 'reconnected',
+            data: [],
+            sender: '',
+            recipient: []
+        };
+
+        this.send(reconnect);
+
         this.queue.forEach((message: Message): void => {
             this.send(message);
         });
