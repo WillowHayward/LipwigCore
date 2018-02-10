@@ -13,9 +13,16 @@ type Message = {
 export class User {
     private id: string;
     private socket: WebSocket.connection;
+    private queue: Message[];
     constructor(id: string, socket: WebSocket.connection) {
         this.id = id;
         this.socket = socket;
+
+        this.socket.on('close', (code: number, desc: string): void => {
+            this.socket.removeAllListeners();
+            this.socket = null;
+            this.queue = [];
+        });
     }
 
     public getID(): string {
@@ -23,11 +30,22 @@ export class User {
     }
 
     public send(message: Message): void {
+        if (this.socket === null) {
+            this.queue.push(message);
+
+            return;
+        }
         const text: string = JSON.stringify(message);
         this.socket.sendUTF(text);
     }
 
     public reconnect(socket: WebSocket.connection): void {
         this.socket = socket;
+
+        this.queue.forEach((message: Message): void => {
+            this.send(message);
+        });
+
+        this.queue = [];
     }
 }
