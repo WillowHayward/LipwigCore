@@ -46,7 +46,7 @@ export class User {
             event: 'reconnected',
             data: [],
             sender: '',
-            recipient: []
+            recipient: [this.id]
         };
 
         this.send(reconnect);

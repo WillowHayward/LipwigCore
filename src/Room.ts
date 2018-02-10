@@ -76,11 +76,16 @@ export class Room {
     }
 
     public reconnect(connection: WebSocketConnection, id: string): ErrorCode {
-        const userID: string = id.slice(4, 8);
-        const user: User = this.users[userID];
+        let user: User;
+        if (id === this.id) {
+            user = this.host;
+        } else {
+            const userID: string = id.slice(4, 8);
+            user = this.users[userID];
 
-        if (user === undefined) {
-            return ErrorCode.USERNOTFOUND;
+            if (user === undefined) {
+                return ErrorCode.USERNOTFOUND;
+            }
         }
 
         user.reconnect(connection);
