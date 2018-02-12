@@ -57,4 +57,12 @@ export class User {
 
         this.queue = [];
     }
+
+    public close(): void {
+        this.socket.close();
+    }
+
+    public equals(socket: WebSocket.connection): boolean {
+        return this.socket === socket;
+    }
 }

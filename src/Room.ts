@@ -94,6 +94,9 @@ export class Room {
     }
 
     public find(userID: string): User {
+        if (userID === this.id) {
+            return this.host;
+        }
         const user: User = this.users[userID];
 
         if (user === undefined) {
@@ -139,5 +142,30 @@ export class Room {
         });
 
         return ErrorCode.SUCCESS;
+    }
+
+    public close(reason: string): void {
+        const message: Message = {
+            event: 'closed',
+            data: [reason], // TODO: Close reason should go here
+            sender: this.id,
+            recipient: []
+        };
+        let user: User;
+        const userIDs: string[] = Object.keys(this.users);
+        userIDs.forEach((id: string): void => {
+            user = this.users[id];
+            message.recipient = [user.getID()];
+            user.send(message);
+            user.close();
+        });
+
+        message.recipient = [this.id];
+        this.host.send(message);
+        this.host.close();
+    }
+
+    public getID(): string {
+        return this.id;
     }
 }

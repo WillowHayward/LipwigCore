@@ -86,6 +86,7 @@ class Lipwig {
     }
 
     private handle(message: Message, connection: WebSocket.connection): ErrorCode {
+        // TODO: Turn this into a map of functions
         switch (message.event) {
             case 'create':
                 message.data.unshift(connection);
@@ -99,6 +100,10 @@ class Lipwig {
                 message.data.unshift(connection);
 
                 return this.reconnect.apply(this, message.data);
+            case 'close':
+                message.data.unshift(connection);
+
+                return this.close.apply(this, message.data);
             default:
                 return this.route(message);
         }
@@ -135,6 +140,31 @@ class Lipwig {
         }
 
         return room.reconnect(connection, id);
+    }
+
+    private close(connection: WebSocket.connection, id: string, reason: string): ErrorCode {
+        const room: Room = this.rooms[id];
+
+        if (room === undefined) {
+            return ErrorCode.ROOMNOTFOUND;
+        }
+
+        if (id !== room.getID()) {
+            return ErrorCode.INSUFFICIENTPERMISSIONS;
+        }
+
+        const user: User = room.find(id);
+
+        if (user === undefined) {
+            return ErrorCode.USERNOTFOUND;
+        }
+
+        if (!user.equals(connection)) {
+            return ErrorCode.INSUFFICIENTPERMISSIONS;
+        }
+
+        room.close(reason);
+        delete this.rooms[id];
     }
 
     private route(message: Message): ErrorCode {

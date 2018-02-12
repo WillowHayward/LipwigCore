@@ -6,5 +6,6 @@ export enum ErrorCode {
     MALFORMED = 1,
     ROOMNOTFOUND = 2,
     ROOMFULL = 3,
-    USERNOTFOUND = 4
+    USERNOTFOUND = 4,
+    INSUFFICIENTPERMISSIONS = 5
 }
