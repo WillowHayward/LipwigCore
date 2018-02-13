@@ -2,19 +2,12 @@
  * @author: William Hayward
  */
 import { connection as WebSocketConnection } from 'websocket'; // TODO: This is just for the types, not used at any point
-import { ErrorCode } from './ErrorCode';
+import { ErrorCode, Message } from './Types';
 import { User } from './User';
 import { Utility } from './Utility';
 
 type UserMap = {
     [index: string] : User;
-};
-
-type Message = {
-    event: string;
-    data: any; // tslint:disable-line:no-any
-    recipient: string[];
-    sender: string;
 };
 
 export class Room {

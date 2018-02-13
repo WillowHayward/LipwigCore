@@ -2,13 +2,7 @@
  * @author: William Hayward
  */
 import * as WebSocket from 'websocket';
-
-type Message = {
-    event: string;
-    data: any[]; // tslint:disable-line:no-any
-    recipient: string[];
-    sender: string;
-};
+import { Message } from './Types';
 
 export class User {
     private id: string;
