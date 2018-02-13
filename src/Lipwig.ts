@@ -20,6 +20,10 @@ type Message = {
     sender: string;
 };
 
+type FunctionMap = {
+    [index: string]: Function;
+};
+
 type RoomMap = {
     [index: string]: Room;
 };
@@ -32,6 +36,8 @@ class Lipwig {
     private ws: WebSocket.server;
     private rooms: RoomMap;
     private server: http.Server;
+    private reserved: FunctionMap;
+
     constructor(port: number = 8080) {
         const server: http.Server = http.createServer();
         this.server = server;
@@ -53,10 +59,20 @@ class Lipwig {
         });
 
         this.rooms = {};
+        this.reserved = {};
+
+        this.reserve('create', this.create);
+        this.reserve('join', this.join);
+        this.reserve('reconnect', this.reconnect);
+        this.reserve('close', this.close);
     }
 
     public exit(code: number = 0): void {
         process.exit(code);
+    }
+
+    private reserve(event: string, callback: Function): void {
+        this.reserved[event] = callback.bind(this);
     }
 
     private newRequest(request: WebSocket.request): void {
@@ -92,27 +108,13 @@ class Lipwig {
     }
 
     private handle(message: Message, connection: WebSocket.connection): ErrorCode {
-        // TODO: Turn this into a map of functions
-        switch (message.event) {
-            case 'create':
-                message.data.unshift(connection);
+        if (message.event in this.reserved) {
+            message.data.unshift(connection);
 
-                return this.create.apply(this, message.data);
-            case 'join':
-                message.data.unshift(connection);
-
-                return this.join.apply(this, message.data);
-            case 'reconnect':
-                message.data.unshift(connection);
-
-                return this.reconnect.apply(this, message.data);
-            case 'close':
-                message.data.unshift(connection);
-
-                return this.close.apply(this, message.data);
-            default:
-                return this.route(message);
+            return this.reserved[message.event].apply(this, message.data);
         }
+
+        return this.route(message);
     }
 
     private create(connection: WebSocket.connection, options?: RoomOptions): ErrorCode {
