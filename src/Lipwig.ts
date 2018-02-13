@@ -30,6 +30,7 @@ class Lipwig {
     private rooms: RoomMap;
     private server: http.Server;
     private reserved: FunctionMap;
+    private connections: WebSocket.connection[];
 
     constructor(port: number = 8080) {
         const server: http.Server = http.createServer();
@@ -53,15 +54,22 @@ class Lipwig {
 
         this.rooms = {};
         this.reserved = {};
+        this.connections = [];
 
         this.reserve('create', this.create);
         this.reserve('join', this.join);
         this.reserve('reconnect', this.reconnect);
         this.reserve('close', this.close);
+        this.reserve('kick', this.kick);
     }
 
     public exit(code: number = 0): void {
-        process.exit(code);
+        this.server.close();
+        this.connections.forEach((socket: WebSocket.connection): void => {
+            if (socket.connected) {
+                socket.close();
+            }
+        });
     }
 
     private reserve(event: string, callback: Function): void {
@@ -76,6 +84,7 @@ class Lipwig {
         }
 
         const connection: WebSocket.connection = request.accept(request.requestedProtocols[0], request.origin);
+        this.connections.push(connection); // TODO: This doesn't get filtered down on disconnect
         connection.on('message', (message: WebSocketMessage): void => {
             const text: string = message.utf8Data.toString();
             let parsed: Message;
@@ -102,16 +111,14 @@ class Lipwig {
 
     private handle(message: Message, connection: WebSocket.connection): ErrorCode {
         if (message.event in this.reserved) {
-            message.data.unshift(connection);
-            message.data.push(message);
-
-            return this.reserved[message.event].apply(this, message.data);
+            return this.reserved[message.event](connection, message);
         }
 
         return this.route(message);
     }
 
-    private create(connection: WebSocket.connection, options?: RoomOptions): ErrorCode {
+    private create(connection: WebSocket.connection, message: Message): ErrorCode {
+        const options: RoomOptions = message.data[0];
         let id: string;
         do {
             id = Utility.generateString();
@@ -123,7 +130,8 @@ class Lipwig {
         return ErrorCode.SUCCESS;
     }
 
-    private join(connection: WebSocket.connection, code: string): ErrorCode {
+    private join(connection: WebSocket.connection, message: Message): ErrorCode {
+        const code: string = message.data[0];
         const room: Room = this.rooms[code];
 
         if (room === undefined) {
@@ -133,7 +141,8 @@ class Lipwig {
         return room.join(connection);
     }
 
-    private reconnect(connection: WebSocket.connection, id: string): ErrorCode {
+    private reconnect(connection: WebSocket.connection, message: Message): ErrorCode {
+        const id: string = message.data[0];
         const code: string = id.slice(0, 4);
         const room: Room = this.rooms[code];
 
@@ -144,7 +153,8 @@ class Lipwig {
         return room.reconnect(connection, id);
     }
 
-    private close(connection: WebSocket.connection, reason: string, message: Message): ErrorCode {
+    private close(connection: WebSocket.connection, message: Message): ErrorCode {
+        const reason: string = message.data[0];
         const id: string = message.sender;
         const room: Room = this.rooms[id];
 
@@ -172,8 +182,9 @@ class Lipwig {
         return ErrorCode.SUCCESS;
     }
 
-    private kick(connection: WebSocket.connection, userID: string, reason: string, message: Message): ErrorCode {
-        console.log('Trying to kick ' + userID);
+    private kick(connection: WebSocket.connection, message: Message): ErrorCode {
+        const userID: string = message.data[0];
+        const reason: string = message.data[1];
         const id: string = message.sender;
         const room: Room = this.rooms[id];
 
