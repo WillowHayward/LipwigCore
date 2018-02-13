@@ -21,7 +21,6 @@ export class Room {
     // TODO: These are the properties. Make this a constructor parameter
     private maxSize: number = 9;
     private host: User;
-
     private users: UserMap;
     private id: string;
     constructor(id: string, host: WebSocketConnection) {

@@ -110,6 +110,7 @@ class Lipwig {
     private handle(message: Message, connection: WebSocket.connection): ErrorCode {
         if (message.event in this.reserved) {
             message.data.unshift(connection);
+            message.data.push(message);
 
             return this.reserved[message.event].apply(this, message.data);
         }
@@ -150,7 +151,35 @@ class Lipwig {
         return room.reconnect(connection, id);
     }
 
-    private close(connection: WebSocket.connection, id: string, reason: string): ErrorCode {
+    private close(connection: WebSocket.connection, reason: string, message: Message): ErrorCode {
+        const id: string = message.sender;
+        const room: Room = this.rooms[id];
+
+        if (room === undefined) {
+            return ErrorCode.ROOMNOTFOUND;
+        }
+
+        if (id !== room.getID()) {
+            return ErrorCode.INSUFFICIENTPERMISSIONS;
+        }
+
+        const user: User = room.find(id);
+
+        if (user === undefined) {
+            return ErrorCode.USERNOTFOUND;
+        }
+
+        if (!user.equals(connection)) {
+            return ErrorCode.INSUFFICIENTPERMISSIONS;
+        }
+
+        room.close(reason);
+        delete this.rooms[id];
+
+        return ErrorCode.SUCCESS;
+    }
+
+    private kick(connection: WebSocket.connection, id: string, reason: string): ErrorCode {
         const room: Room = this.rooms[id];
 
         if (room === undefined) {
