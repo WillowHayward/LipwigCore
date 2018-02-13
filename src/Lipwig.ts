@@ -31,12 +31,19 @@ type RoomOptions = {
 class Lipwig {
     private ws: WebSocket.server;
     private rooms: RoomMap;
+    private server: http.Server;
     constructor(port: number = 8080) {
         const server: http.Server = http.createServer();
+        this.server = server;
+
+        server.on('error', (err: Error): void => {
+            console.log(port + ' in use. Exiting.');
+            this.exit();
+        });
+
         server.listen(port, () => {
             console.log('Listening on ' + port);
         });
-
         this.ws = new WebSocket.server({
             httpServer: server,
             autoAcceptConnections: false
