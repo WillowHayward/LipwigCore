@@ -1,6 +1,7 @@
 /**
  * @author: William Hayward
  */
+import { EventEmitter } from 'events';
 import * as http from 'http';
 import * as WebSocket from 'websocket';
 import { Room } from './Room';
@@ -11,6 +12,10 @@ import { Utility } from './Utility';
 type WebSocketMessage = {
     type: string; // tslint:disable-line:no-reserved-keywords
     utf8Data: string;
+};
+
+type StringMap = {
+    [index: string]: string;
 };
 
 type FunctionMap = {
@@ -25,7 +30,7 @@ type RoomOptions = {
     size: number;
 };
 
-class Lipwig {
+class Lipwig extends EventEmitter {
     private ws: WebSocket.server;
     private rooms: RoomMap;
     private server: http.Server;
@@ -33,6 +38,7 @@ class Lipwig {
     private connections: WebSocket.connection[];
 
     constructor(port: number = 8080) {
+        super();
         const server: http.Server = http.createServer();
         this.server = server;
 
@@ -42,6 +48,7 @@ class Lipwig {
 
         server.listen(port, () => {
             console.log('Listening on ' + port);
+            this.emit('started');
         });
         this.ws = new WebSocket.server({
             httpServer: server,
@@ -90,18 +97,65 @@ class Lipwig {
             let parsed: Message;
             try {
                 parsed = JSON.parse(text);
+
+                if (!this.isValidMessage(parsed)) {
+                    throw new Error();
+                }
             } catch (error) {
-                connection.send(ErrorCode.MALFORMED); // TODO: Determine a numerical system for errors/messages
+                this.reportError(connection, ErrorCode.MALFORMED, text);
 
                 return;
             }
-            const error: ErrorCode = this.handle(parsed, connection);
+            const error: ErrorCode = this.handle(parsed, connection); // TODO: Consider wrapping this in a try..catch
             if (error !== ErrorCode.SUCCESS) {
-                // TODO: return error code
+                this.reportError(connection, error, text);
             }
         });
 
         return;
+    }
+
+    private isValidMessage(message: Message): boolean {
+        // TODO: Properly implement this
+        return true;
+
+        /*
+        const types: StringMap = {
+            event: 'string',
+            data: 'object',
+            sender: 'string',
+            recipient: 'object'
+        };
+
+        const keys: string[] = Object.keys(message);
+        if (keys.length !== 4) {
+            console.log('Wrong length');
+
+            return false;
+        }
+
+        let correctFormat: boolean = true;
+        keys.forEach((key: string): void => {
+            if (typeof message[key] !== types[key]) {
+                console.log(key + ' is wrong type');
+                correctFormat = false;
+            }
+        });
+
+        if (!correctFormat) {
+            return false;
+        }*/
+    }
+
+    private reportError(connection: WebSocket.connection, code: ErrorCode, cause: string): void {
+        const message: Message = {
+            event: 'error',
+            data: [code, cause],
+            sender: '',
+            recipient: []
+        };
+        const text: string = JSON.stringify(message);
+        connection.send(text);
     }
 
     private isOriginAllowed(origin: string): boolean {

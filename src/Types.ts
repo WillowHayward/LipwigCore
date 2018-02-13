@@ -2,6 +2,7 @@
  * @author: William Hayward
  */
 export type Message = {
+    [key: string]: any; // tslint:disable-line:no-any
     event: string;
     data: any[]; // tslint:disable-line:no-any
     recipient: string[];

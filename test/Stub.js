@@ -2,8 +2,11 @@ const Lipwig = require('../lib/Lipwig.js');
 const Stub = require('../lib/Stub.js').Stub;
 let lw;
 describe('Stub', function() {
-    before(function() {
+    before(function(done) {
         lw = new Lipwig();
+        lw.on('started', function() {
+            done();
+        });
     });
 
     after(function() {
