@@ -37,7 +37,7 @@ class Lipwig {
         this.server = server;
 
         server.on('error', (err: Error): void => {
-            console.log(port + ' in use. Exiting.');
+            console.log('Port ' + port + ' in use');
         });
 
         server.listen(port, () => {
@@ -171,6 +171,8 @@ class Lipwig {
 
         room.close(reason);
         delete this.rooms[id];
+
+        return ErrorCode.SUCCESS;
     }
 
     private route(message: Message): ErrorCode {

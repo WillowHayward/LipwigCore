@@ -147,7 +147,7 @@ export class Room {
     public close(reason: string): void {
         const message: Message = {
             event: 'closed',
-            data: [reason], // TODO: Close reason should go here
+            data: [reason],
             sender: this.id,
             recipient: []
         };
