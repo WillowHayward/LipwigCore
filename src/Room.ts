@@ -164,6 +164,26 @@ export class Room {
         this.host.close();
     }
 
+    public kick(id: string, reason: string) : ErrorCode {
+        const userID: string = id.slice(4, 8);
+        const user: User = this.users[userID];
+
+        if (user === undefined) {
+            return ErrorCode.USERNOTFOUND;
+        }
+
+        const message: Message = {
+            event: 'kicked',
+            data: [reason],
+            sender: this.id,
+            recipient: [id]
+        };
+
+        user.send(message);
+
+        return ErrorCode.SUCCESS;
+    }
+
     public getID(): string {
         return this.id;
     }

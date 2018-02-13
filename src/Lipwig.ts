@@ -179,7 +179,9 @@ class Lipwig {
         return ErrorCode.SUCCESS;
     }
 
-    private kick(connection: WebSocket.connection, id: string, reason: string): ErrorCode {
+    private kick(connection: WebSocket.connection, userID: string, reason: string, message: Message): ErrorCode {
+        console.log('Trying to kick ' + userID);
+        const id: string = message.sender;
         const room: Room = this.rooms[id];
 
         if (room === undefined) {
@@ -200,10 +202,7 @@ class Lipwig {
             return ErrorCode.INSUFFICIENTPERMISSIONS;
         }
 
-        room.close(reason);
-        delete this.rooms[id];
-
-        return ErrorCode.SUCCESS;
+        return room.kick(userID, reason);
     }
 
     private route(message: Message): ErrorCode {
