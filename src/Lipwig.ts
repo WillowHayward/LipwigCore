@@ -38,7 +38,6 @@ class Lipwig {
 
         server.on('error', (err: Error): void => {
             console.log(port + ' in use. Exiting.');
-            this.exit();
         });
 
         server.listen(port, () => {
