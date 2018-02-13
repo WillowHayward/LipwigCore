@@ -174,6 +174,8 @@ export class Room {
 
         user.send(message);
 
+        user.close();
+
         return ErrorCode.SUCCESS;
     }
 
