@@ -1,9 +1,9 @@
 /**
  * @author: William Hayward
  */
-import { EventEmitter } from 'events';
 import * as http from 'http';
 import * as WebSocket from 'websocket';
+import { EventManager } from './EventManager';
 import { Room } from './Room';
 import { ErrorCode, Message } from './Types';
 import { User } from './User';
@@ -30,7 +30,7 @@ type RoomOptions = {
     size: number;
 };
 
-class Lipwig extends EventEmitter {
+class Lipwig extends EventManager {
     private ws: WebSocket.server;
     private rooms: RoomMap;
     private server: http.Server;

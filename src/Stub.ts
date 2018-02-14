@@ -2,11 +2,11 @@
  * @author: William Hayward
  * @description: A stub class to allow for testing client connections
  */
-import { EventEmitter } from 'events';
 import * as WebSocket from 'websocket';
+import { EventManager } from './EventManager';
 import { Message } from './Types';
 
-export class Stub extends EventEmitter {
+export class Stub extends EventManager {
     private socket: WebSocket.connection;
     constructor(url: string) {
         super();
