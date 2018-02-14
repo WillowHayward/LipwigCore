@@ -145,32 +145,6 @@ class Lipwig extends EventEmitter {
         }
 
         return true;
-        /*
-        const types: StringMap = {
-            event: 'string',
-            data: 'object',
-            sender: 'string',
-            recipient: 'object'
-        };
-
-        const keys: string[] = Object.keys(message);
-        if (keys.length !== 4) {
-            console.log('Wrong length');
-
-            return false;
-        }
-
-        let correctFormat: boolean = true;
-        keys.forEach((key: string): void => {
-            if (typeof message[key] !== types[key]) {
-                console.log(key + ' is wrong type');
-                correctFormat = false;
-            }
-        });
-
-        if (!correctFormat) {
-            return false;
-        }*/
     }
 
     private reportError(connection: WebSocket.connection, code: ErrorCode, cause: string): void {
