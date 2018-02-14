@@ -94,31 +94,57 @@ class Lipwig extends EventEmitter {
         this.connections.push(connection); // TODO: This doesn't get filtered down on disconnect
         connection.on('message', (message: WebSocketMessage): void => {
             const text: string = message.utf8Data.toString();
-            let parsed: Message;
-            try {
-                parsed = JSON.parse(text);
+            const parsed: Message | ErrorCode = this.getMessage(text);
 
-                if (!this.isValidMessage(parsed)) {
-                    throw new Error();
-                }
-            } catch (error) {
-                this.reportError(connection, ErrorCode.MALFORMED, text);
+            if (typeof parsed === 'number') {
+                // ErrorCode
+                const error: ErrorCode = parsed;
+                this.reportError(connection, error, message.utf8Data);
 
                 return;
             }
-            const error: ErrorCode = this.handle(parsed, connection); // TODO: Consider wrapping this in a try..catch
-            if (error !== ErrorCode.SUCCESS) {
-                this.reportError(connection, error, text);
+
+            const response: ErrorCode = this.handle(parsed, connection);
+
+            if (response !== ErrorCode.SUCCESS) {
+                this.reportError(connection, response, text);
             }
         });
 
         return;
     }
 
+    private getMessage(text: string): ErrorCode | Message {
+        let message: Message;
+        try {
+            message = JSON.parse(text);
+        } catch (error) {
+            return ErrorCode.MALFORMED;
+        }
+
+        if (!this.isValidMessage(message)) {
+            return ErrorCode.MALFORMED;
+        }
+
+        return message;
+    }
+
     private isValidMessage(message: Message): boolean {
         // TODO: Properly implement this
-        return true;
 
+        if (typeof message.data !== 'object' ||
+            typeof message.event !== 'string' ||
+            typeof message.sender !== 'string' ||
+            typeof message.recipient !== 'object') {
+                return false;
+        }
+
+        const keys: string[] = Object.keys(message);
+        if (keys.length !== 4) {
+            return false;
+        }
+
+        return true;
         /*
         const types: StringMap = {
             event: 'string',
