@@ -5,7 +5,7 @@ import * as http from 'http';
 import * as WebSocket from 'websocket';
 import { EventManager } from './EventManager';
 import { Room } from './Room';
-import { ErrorCode, LipwigOptions, Message, RoomOptions } from './Types';
+import { ErrorCode, LipwigOptions, Message, RoomOptions, UserOptions } from './Types';
 import { User } from './User';
 import { Utility } from './Utility';
 
@@ -188,6 +188,10 @@ class Lipwig extends EventManager {
 
     private create(connection: WebSocket.connection, message: Message): ErrorCode {
         const options: RoomOptions = message.data[0] || {};
+        if (typeof options !== 'object') {
+            return ErrorCode.MALFORMED;
+        }
+
         let id: string;
         do {
             id = Utility.generateString();
@@ -201,13 +205,33 @@ class Lipwig extends EventManager {
 
     private join(connection: WebSocket.connection, message: Message): ErrorCode {
         const code: string = message.data[0];
+
+        if (typeof code !== 'string') {
+            return ErrorCode.MALFORMED;
+        }
+
+        let data: UserOptions = message.data[1];
+
+        if (data === undefined) {
+            data = {};
+        }
+
+        if (typeof data !== 'object') {
+            return ErrorCode.MALFORMED;
+        }
+
         const room: Room = this.rooms[code];
 
         if (room === undefined) {
             return ErrorCode.ROOMNOTFOUND;
         }
 
-        return room.join(connection);
+        if (!room.checkPassword(data.password)) {
+            return ErrorCode.INCORRECTPASSWORD;
+        }
+        delete data.password;
+
+        return room.join(connection, data);
     }
 
     private reconnect(connection: WebSocket.connection, message: Message): ErrorCode {

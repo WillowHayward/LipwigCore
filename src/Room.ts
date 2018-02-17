@@ -2,7 +2,7 @@
  * @author: William Hayward
  */
 import { connection as WebSocketConnection } from 'websocket'; // TODO: This is just for the types, not used at any point
-import { ErrorCode, Message, RoomOptions } from './Types';
+import { ErrorCode, Message, RoomOptions, UserOptions } from './Types';
 import { User } from './User';
 import { Utility } from './Utility';
 
@@ -34,7 +34,7 @@ export class Room {
         this.host.send(message);
     }
 
-    public join(socket: WebSocketConnection): ErrorCode {
+    public join(socket: WebSocketConnection, data: UserOptions): ErrorCode {
         let id: string;
 
         do {
@@ -48,7 +48,7 @@ export class Room {
         if (error === ErrorCode.SUCCESS) {
             const message: Message = {
                 event: 'joined',
-                data: [this.id + user.getID()],
+                data: [this.id + user.getID(), data],
                 sender: '',
                 recipient: ['']
             };
@@ -180,6 +180,14 @@ export class Room {
         user.close();
 
         return ErrorCode.SUCCESS;
+    }
+
+    public checkPassword(password: string): boolean {
+        if (this.options.password.length === 0) {
+            return true;
+        }
+
+        return password.localeCompare(this.options.password) === 0;
     }
 
     public getID(): string {

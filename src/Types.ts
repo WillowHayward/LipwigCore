@@ -9,7 +9,8 @@ export enum ErrorCode {
     ROOMNOTFOUND = 2,
     ROOMFULL = 3,
     USERNOTFOUND = 4,
-    INSUFFICIENTPERMISSIONS = 5
+    INSUFFICIENTPERMISSIONS = 5,
+    INCORRECTPASSWORD = 6
 }
 
 export type Message = {
@@ -37,3 +38,7 @@ export type RoomOptionsRaw = {
 };
 
 export type RoomOptions = Partial<RoomOptionsRaw>;
+
+export type UserOptions = {
+    [index: string]: any; // tslint:disable-line:no-any
+};
