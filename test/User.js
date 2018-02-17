@@ -12,6 +12,7 @@ describe('User', function() {
     after(function() {
         lw.exit();
     });
+
     function create() {
         const host = new Stub('ws://localhost:8080');
         host.on('connected', function() {
