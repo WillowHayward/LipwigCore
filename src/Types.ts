@@ -1,13 +1,7 @@
 /**
  * @author: William Hayward
  */
-export type Message = {
-    [key: string]: any; // tslint:disable-line:no-any
-    event: string;
-    data: any[]; // tslint:disable-line:no-any
-    recipient: string[];
-    sender: string;
-};
+import * as http from 'http';
 
 export enum ErrorCode {
     SUCCESS = 0,
@@ -17,3 +11,29 @@ export enum ErrorCode {
     USERNOTFOUND = 4,
     INSUFFICIENTPERMISSIONS = 5
 }
+
+export type Message = {
+    [key: string]: any; // tslint:disable-line:no-any
+    event: string;
+    data: any[]; // tslint:disable-line:no-any
+    recipient: string[];
+    sender: string;
+};
+
+type LipwigOptionsRaw = {
+    port: number;
+    roomNumberLimit: number;
+    roomSizeLimit: number;
+    http: http.Server;
+    name: string;
+};
+
+export type LipwigOptions = Partial<LipwigOptionsRaw>;
+
+export type RoomOptionsRaw = {
+    size: number;
+    password: string;
+    name: string;
+};
+
+export type RoomOptions = Partial<RoomOptionsRaw>;

@@ -5,7 +5,7 @@ import * as http from 'http';
 import * as WebSocket from 'websocket';
 import { EventManager } from './EventManager';
 import { Room } from './Room';
-import { ErrorCode, Message } from './Types';
+import { ErrorCode, LipwigOptions, Message, RoomOptions } from './Types';
 import { User } from './User';
 import { Utility } from './Utility';
 
@@ -26,32 +26,42 @@ type RoomMap = {
     [index: string]: Room;
 };
 
-type RoomOptions = {
-    size: number;
-};
-
 class Lipwig extends EventManager {
+    private options: LipwigOptions;
     private ws: WebSocket.server;
     private rooms: RoomMap;
-    private server: http.Server;
     private reserved: FunctionMap;
     private connections: WebSocket.connection[];
 
-    constructor(port: number = 8080) {
+    constructor(options: LipwigOptions = {}) {
         super();
-        const server: http.Server = http.createServer();
-        this.server = server;
 
-        server.on('error', (err: Error): void => {
-            console.log('Port ' + port + ' in use');
-        });
+        options.name = options.name || '';
+        options.port = options.port || 8080;
+        options.roomNumberLimit = options.roomNumberLimit || 0;
+        options.roomSizeLimit = options.roomSizeLimit || 0;
 
-        server.listen(port, () => {
-            console.log('Listening on ' + port);
+        if (options.http === undefined) {
+            const server: http.Server = http.createServer();
+
+            server.on('error', (err: Error): void => {
+                console.log('Port ' + options.port + ' in use');
+            });
+
+            server.listen(options.port, () => {
+                console.log('Listening on ' + options.port);
+                this.emit('started');
+            });
+
+            options.http = server;
+        } else {
             this.emit('started');
-        });
+        }
+
+        this.options = options;
+
         this.ws = new WebSocket.server({
-            httpServer: server,
+            httpServer: options.http,
             autoAcceptConnections: false
         });
 
@@ -177,13 +187,13 @@ class Lipwig extends EventManager {
     }
 
     private create(connection: WebSocket.connection, message: Message): ErrorCode {
-        const options: RoomOptions = message.data[0];
+        const options: RoomOptions = message.data[0] || {};
         let id: string;
         do {
             id = Utility.generateString();
         } while (this.rooms[id] !== undefined);
 
-        const room: Room = new Room(id, connection);
+        const room: Room = new Room(id, connection, options);
         this.rooms[id] = room;
 
         return ErrorCode.SUCCESS;

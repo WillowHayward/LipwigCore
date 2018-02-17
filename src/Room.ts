@@ -2,7 +2,7 @@
  * @author: William Hayward
  */
 import { connection as WebSocketConnection } from 'websocket'; // TODO: This is just for the types, not used at any point
-import { ErrorCode, Message } from './Types';
+import { ErrorCode, Message, RoomOptions } from './Types';
 import { User } from './User';
 import { Utility } from './Utility';
 
@@ -11,24 +11,27 @@ type UserMap = {
 };
 
 export class Room {
-    // TODO: These are the properties. Make this a constructor parameter
-    private maxSize: number = 9;
+    private options: RoomOptions;
     private host: User;
     private users: UserMap;
     private id: string;
-    constructor(id: string, host: WebSocketConnection) {
+    constructor(id: string, host: WebSocketConnection, options: RoomOptions) {
+        options.name = options.name || '';
+        options.password = options.password || '';
+        options.size = options.size || 8;
+        this.options = options;
+
         this.id = id;
         this.users = {};
-        if (host !== undefined) {
-            this.host = new User('', host);
-            const message: Message = {
-                event: 'created',
-                data: [id],
-                sender: '',
-                recipient: []
-            };
-            this.host.send(message);
-        }
+
+        this.host = new User('', host);
+        const message: Message = {
+            event: 'created',
+            data: [id],
+            sender: '',
+            recipient: []
+        };
+        this.host.send(message);
     }
 
     public join(socket: WebSocketConnection): ErrorCode {
@@ -57,7 +60,7 @@ export class Room {
     }
 
     public add(user: User): ErrorCode {
-        if (this.size() === this.maxSize) {
+        if (this.size() === this.options.size) {
             return ErrorCode.ROOMFULL;
         }
 
