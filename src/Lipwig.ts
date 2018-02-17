@@ -71,8 +71,8 @@ class Lipwig extends EventManager {
     }
 
     public exit(code: number = 0): void {
-        this.server.close();
-        this.connections.forEach((socket: WebSocket.connection): void => {
+        this.options.http.close();
+        this.connections.slice(0).forEach((socket: WebSocket.connection): void => {
             if (socket.connected) {
                 socket.close();
             }
@@ -91,7 +91,7 @@ class Lipwig extends EventManager {
         }
 
         const connection: WebSocket.connection = request.accept(request.requestedProtocols[0], request.origin);
-        this.connections.push(connection); // TODO: This doesn't get filtered down on disconnect
+        this.connections.push(connection);
         connection.on('message', (message: WebSocketMessage): void => {
             const text: string = message.utf8Data.toString();
             const parsed: Message | ErrorCode = this.getMessage(text);
@@ -109,6 +109,11 @@ class Lipwig extends EventManager {
             if (response !== ErrorCode.SUCCESS) {
                 this.reportError(connection, response, text);
             }
+        });
+
+        connection.on('close', (): void => {
+            const index: number = this.connections.indexOf(connection);
+            this.connections.splice(index, 1);
         });
 
         return;
