@@ -121,9 +121,10 @@ describe('Stress', function() {
     }
 
     function stress(rooms, users, messages, done) {
-        expected = rooms * users * messages;
         codes = [];
         completed = [];
+        progress = 0;
+        expected = rooms * users;
         createRooms(rooms, function(codes) {
             joinRooms(users * rooms, codes, function(clients) {
                 clients.forEach(function(client, index) {
@@ -139,6 +140,10 @@ describe('Stress', function() {
 
                     client.on('finished', function() {
                         completed[index] = true;
+                        progress++;
+                        if (report && progress / expected * 100 % 10 === 0) {
+                            console.log(progress / expected * 100 % 10 + '% completed');
+                        }
                         if (completed.indexOf(false) === -1 && completed.length === users * rooms) {
                             done();
                         }
@@ -226,7 +231,7 @@ describe('Stress', function() {
                 rooms = test.rooms;
                 users = test.users;
                 messages = test.messages;
-                total = rooms * users * messages;
+                total = rooms * users * messages * 2; // * 2 because messages are sent both ways
                 it('should handle ' + rooms + ' rooms with ' + users + ' users sending ' 
                     + messages + ' messages each (' + total + ' messages)', function(done) {
 
@@ -234,7 +239,7 @@ describe('Stress', function() {
                         users = test.users;
                         messages = test.messages;
                         total = rooms * users * messages;
-                        if (total > 1000000) {
+                        if (total >= 1000000) {
                             console.log('You might want to get a cup of coffee...');
                             report = true;
                         }
