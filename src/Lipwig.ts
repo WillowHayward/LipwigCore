@@ -32,10 +32,8 @@ class Lipwig extends EventManager {
     private rooms: RoomMap;
     private reserved: FunctionMap;
     private connections: WebSocket.connection[];
-
     constructor(options: LipwigOptions = {}) {
         super();
-
         options.name = options.name || '';
         options.port = options.port || 8080;
         options.roomNumberLimit = options.roomNumberLimit || 0;
@@ -80,12 +78,15 @@ class Lipwig extends EventManager {
         this.reserve('kick', this.kick);
     }
 
-    public exit(code: number = 0): void {
+    public exit(): void {
         this.options.http.close();
         this.connections.slice(0).forEach((socket: WebSocket.connection): void => {
             if (socket.connected) {
                 socket.close();
             }
+        });
+        this.options.http.on('close', (): void => {
+            this.emit('closed');
         });
     }
 
