@@ -9,7 +9,7 @@ const Stub = require('../lib/Stub.js').Stub;
 let room;
 let lw;
 describe('Room', function() {
-
+    let lw;
     before(function(done) {
         lw = new Lipwig();
         lw.on('started', function() {
@@ -20,9 +20,10 @@ describe('Room', function() {
     beforeEach(function() {
         //room = new Room('ABC');
     })
-
-    after(function() {
+    
+    after(function(done) {
         lw.exit();
+        lw.on('closed', done);
     });
 
     function create(options) {

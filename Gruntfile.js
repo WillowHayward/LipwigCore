@@ -5,7 +5,8 @@ module.exports = function(grunt) {
         pkg: grunt.file.readJSON('package.json'),
         exec: {
             tsc: './node_modules/typescript/bin/tsc',
-            mocha: './node_modules/mocha/bin/mocha'
+            mocha: './node_modules/mocha/bin/mocha --grep Stress --invert',
+            stress: './node_modules/mocha/bin/mocha --grep Stress'
         },
         tslint: {
             options: {
@@ -35,6 +36,8 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-watch');
 
     // Default task(s).
-    grunt.registerTask('build', ['tslint', 'exec'])
+    grunt.registerTask('build', ['tslint', 'exec:tsc', 'exec:mocha']);
+    grunt.registerTask('stress', ['tslint', 'exec:tsc', 'exec:stress']);
+    grunt.registerTask('full', ['tslint', 'exec']);
     grunt.registerTask('default', ['build']);
   };

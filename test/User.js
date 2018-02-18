@@ -2,15 +2,17 @@ const Lipwig = require('../lib/Lipwig.js');
 const Stub = require('../lib/Stub.js').Stub;
 
 describe('User', function() {
+    let lw;
     before(function(done) {
         lw = new Lipwig();
         lw.on('started', function() {
             done();
         });
     });
-
-    after(function() {
+    
+    after(function(done) {
         lw.exit();
+        lw.on('closed', done);
     });
 
     function create() {

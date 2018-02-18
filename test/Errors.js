@@ -10,9 +10,10 @@ describe('Errors', function() {
             done();
         })
     });
-
-    after(function() {
+    
+    after(function(done) {
         lw.exit();
+        lw.on('closed', done);
     });
 
     function create() {
