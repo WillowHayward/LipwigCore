@@ -42,7 +42,7 @@ export class Stub extends EventManager {
 
     public handle(evt: WebSocket.IMessage): void {
         const message: Message = JSON.parse(evt.utf8Data);
-        const args: any[] = message.data; // tslint:disable-line:no-any
+        const args: any[] = message.data || []; // tslint:disable-line:no-any
         args.unshift(message.event);
         args.push(message);
         this.emit.apply(this, args);

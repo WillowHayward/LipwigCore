@@ -35,6 +35,7 @@ export type RoomOptionsRaw = {
     size: number;
     password: string;
     name: string;
+    remote: boolean;
 };
 
 export type RoomOptions = Partial<RoomOptionsRaw>;

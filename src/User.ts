@@ -2,14 +2,20 @@
  * @author: William Hayward
  */
 import * as WebSocket from 'websocket';
+import { Client } from './Client';
 import { Message } from './Types';
 
 export class User {
     private id: string;
     private socket: WebSocket.connection;
     private queue: Message[];
+    private client: Client;
     constructor(id: string, socket: WebSocket.connection) {
         this.id = id;
+
+        if (socket === null) {
+            return;
+        }
         this.socket = socket;
 
         this.socket.on('close', (code: number, desc: string): void => {
@@ -21,6 +27,14 @@ export class User {
 
     public getID(): string {
         return this.id;
+    }
+
+    public getClient(): Client {
+        if (this.client === undefined) {
+            this.client = new Client(this);
+        }
+
+        return this.client;
     }
 
     public send(message: Message): void {

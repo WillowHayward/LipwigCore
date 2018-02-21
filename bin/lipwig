@@ -2,6 +2,12 @@
 
 "use strict"
 process.title = 'lipwig';
+process.argv.forEach(function(value, index) {
+    if (index === 0) {
+        return;
+    }
+    
+});
 
 const Lipwig = require('../lib/Lipwig.js');
 const lipwig = new Lipwig();

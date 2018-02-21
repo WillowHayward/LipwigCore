@@ -2,6 +2,8 @@
  * @author: William Hayward
  */
 import { connection as WebSocketConnection } from 'websocket'; // TODO: This is just for the types, not used at any point
+import { Client } from './Client';
+import { Host } from './Host';
 import { ErrorCode, Message, RoomOptions, UserOptions } from './Types';
 import { User } from './User';
 import { Utility } from './Utility';
@@ -13,25 +15,44 @@ type UserMap = {
 export class Room {
     private options: RoomOptions;
     private host: User;
+    private remoteHost: Host;
+    private creator: User;
     private users: UserMap;
     private id: string;
     constructor(id: string, host: WebSocketConnection, options: RoomOptions) {
         options.name = options.name || '';
         options.password = options.password || '';
         options.size = options.size || 8;
+        options.remote = options.remote || false;
+
         this.options = options;
 
         this.id = id;
         this.users = {};
 
-        this.host = new User('', host);
         const message: Message = {
             event: 'created',
             data: [id],
             sender: '',
             recipient: []
         };
-        this.host.send(message);
+
+        if (this.options.remote) {
+            const userID: string = Utility.generateString();
+            this.creator = new User(userID, host);
+            this.add(this.creator);
+            message.data.push(id + userID);
+            this.users[userID] = this.creator;
+            this.creator.send(message);
+            this.host = null;
+            this.remoteHost = new Host(id);
+
+            message.data = [this.remoteHost, this.creator.getClient()];
+            this.remoteHost.handle(message);
+        } else {
+            this.host = new User('', host);
+            this.host.send(message);
+        }
     }
 
     public join(socket: WebSocketConnection, data: UserOptions): ErrorCode {
@@ -53,7 +74,13 @@ export class Room {
                 recipient: ['']
             };
             user.send(message);
-            this.host.send(message);
+
+            if (this.options.remote) {
+                message.data[0] = user;
+                this.remoteHost.handle(message);
+            } else {
+                this.host.send(message);
+            }
         }
 
         return error;
@@ -73,6 +100,9 @@ export class Room {
     public reconnect(connection: WebSocketConnection, id: string): ErrorCode {
         let user: User;
         if (id === this.id) {
+            if (this.options.remote) {
+                return ErrorCode.MALFORMED;
+            }
             user = this.host;
         } else {
             const userID: string = id.slice(4, 8);
@@ -90,6 +120,10 @@ export class Room {
 
     public find(userID: string): User {
         if (userID === this.id) {
+            if (this.options.remote) {
+                return null;
+            }
+
             return this.host;
         }
         const user: User = this.users[userID];
@@ -105,11 +139,34 @@ export class Room {
         return Object.keys(this.users).length;
     }
 
+    public getRemoteHost(): Host {
+        return this.remoteHost;
+    }
+
+    public getRemoteCreator(): Client {
+        return this.creator.getClient();
+    }
+
+    public isRemote(): boolean {
+        return this.options.remote;
+    }
+
     public route(message: Message): ErrorCode {
         const users: User[] = [];
         let missingUser: boolean = false;
         if (message.sender !== this.id) {
-            this.host.send(message);
+            const origin: User = this.find(message.sender.slice(4, 8));
+
+            if (origin === null) {
+                return ErrorCode.USERNOTFOUND;
+            }
+
+            if (this.options.remote) {
+                message.data.unshift(origin.getClient());
+                this.remoteHost.handle(message);
+            } else {
+                this.host.send(message);
+            }
 
             return ErrorCode.SUCCESS;
         }
@@ -156,8 +213,12 @@ export class Room {
         });
 
         message.recipient = [this.id];
-        this.host.send(message);
-        this.host.close();
+        if (this.options.remote) {
+            this.remoteHost.handle(message);
+        } else {
+            this.host.send(message);
+            this.host.close();
+        }
     }
 
     public kick(id: string, reason: string) : ErrorCode {

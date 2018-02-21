@@ -3,7 +3,9 @@
  */
 import * as http from 'http';
 import * as WebSocket from 'websocket';
+import { Client } from './Client';
 import { EventManager } from './EventManager';
+import { Host } from './Host';
 import { Room } from './Room';
 import { ErrorCode, LipwigOptions, Message, RoomOptions, UserOptions } from './Types';
 import { User } from './User';
@@ -201,6 +203,12 @@ class Lipwig extends EventManager {
         const room: Room = new Room(id, connection, options);
         this.rooms[id] = room;
 
+        if (room.isRemote()) {
+            const host: Host = room.getRemoteHost();
+            const creator: Client = room.getRemoteCreator();
+            this.emit('created', host, creator);
+        }
+
         return ErrorCode.SUCCESS;
     }
 
@@ -292,7 +300,7 @@ class Lipwig extends EventManager {
 
         const user: User = room.find(id);
 
-        if (user === undefined) {
+        if (user === null) {
             return ErrorCode.USERNOTFOUND;
         }
 
