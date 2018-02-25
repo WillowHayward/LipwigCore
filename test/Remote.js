@@ -141,7 +141,7 @@ describe('Remote', function() {
 
             client.on('pong', function() {
                 done();
-            })
+            });
         });
 
         lw.on('created', function(host, creator) {

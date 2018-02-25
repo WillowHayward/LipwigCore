@@ -13,6 +13,12 @@ describe('Stress', function() {
         lw.on('started', function() {
             done();
         });
+
+        lw.on('created', function(host) {
+            host.on('ping', function(user, count) {
+                user.send('pong', count);
+            })
+        });
     });
     
     after(function(done) {
@@ -91,8 +97,45 @@ describe('Stress', function() {
         });
     }
 
+    function createRemoteRooms(remaining, done, codes) {
+        codes = codes || [];
+        creator = create({
+            remote: true
+        });
+        creator.on('created', function(code, id) {
+            codes.push(code);
+            this.id = id;
+            remaining--;
+            if (remaining) {
+                createRemoteRooms(remaining, done, codes);
+            } else {
+                if (report) {
+                    console.log('Rooms created');
+                }
+                done(codes, creator);
+            }
+        });
+
+        creator.on('error', function(code) {
+            console.log(code);
+        });
+        creator.on('pong', function(count) {
+            console.log(count);
+            count++;
+            if (count === this.total) {
+                this.emit('finished');
+            } else {
+                this.message.data[0] = count;
+                this.send(this.message);
+            }
+        });
+    }
+
     function joinRooms(remaining, codes, done, users) {
         users = users || [];
+        if (remaining === 0) {
+            done(users);
+        }
         code = codes[remaining % codes.length];
         client = join(code);
         client.on('joined', function(id) {
@@ -120,13 +163,19 @@ describe('Stress', function() {
         });
     }
 
-    function stress(rooms, users, messages, done) {
+    function stress(rooms, users, messages, done, roomFunction) {
         codes = [];
         completed = [];
         progress = 0;
         expected = rooms * users;
-        createRooms(rooms, function(codes) {
-            joinRooms(users * rooms, codes, function(clients) {
+        roomFunction(rooms, function(codes, creator) {
+            if (creator !== undefined) {
+                expected = rooms * users - 1;
+            }
+            joinRooms(expected, codes, function(clients) {
+                if (creator !== undefined) {
+                    clients.push(creator);
+                }
                 clients.forEach(function(client, index) {
                     completed[index] = false;
                     client.message = {
@@ -153,7 +202,6 @@ describe('Stress', function() {
                 });
             });
         });
-
     }
 
     tests = {
@@ -224,30 +272,60 @@ describe('Stress', function() {
             }
         ]
     }
-    const keys = Object.keys(tests);
-    keys.forEach(function(key) {
-        describe(key, function() {
-            tests[key].forEach(function(test) {
-                rooms = test.rooms;
-                users = test.users;
-                messages = test.messages;
-                total = rooms * users * messages * 2; // * 2 because messages are sent both ways
-                it('should handle ' + rooms + ' rooms with ' + users + ' users sending ' 
-                    + messages + ' messages each (' + total + ' messages)', function(done) {
 
-                        rooms = test.rooms;
-                        users = test.users;
-                        messages = test.messages;
-                        total = rooms * users * messages;
-                        if (total >= 1000000) {
-                            console.log('You might want to get a cup of coffee...');
-                            report = true;
-                        }
-                        stress(rooms, users, messages, done);
+    const keys = Object.keys(tests);
+
+    describe('regular', function() {
+        report = false;
+        keys.forEach(function(key) {
+            describe(key, function() {
+                tests[key].forEach(function(test) {
+                    rooms = test.rooms;
+                    users = test.users;
+                    messages = test.messages;
+                    total = rooms * users * messages * 2; // * 2 because messages are sent both ways
+                    it('should handle ' + rooms + ' rooms with ' + users + ' users sending ' 
+                        + messages + ' messages each (' + total + ' messages)', function(done) {
+    
+                            rooms = test.rooms;
+                            users = test.users;
+                            messages = test.messages;
+                            total = rooms * users * messages;
+                            if (total >= 1000000) {
+                                console.log('You might want to get a cup of coffee...');
+                                report = true;
+                            }
+                            stress(rooms, users, messages, done, createRooms);
+                    });
+                });
+            });
+        });
+    });
+
+    describe('remote', function() {
+        report = true;
+        keys.forEach(function(key) {
+            describe(key, function() {
+                tests[key].forEach(function(test) {
+                    rooms = test.rooms;
+                    users = test.users;
+                    messages = test.messages;
+                    total = rooms * users * messages;
+                    it('should remotely handle ' + rooms + ' rooms with ' + users + ' users sending ' 
+                        + messages + ' messages each (' + total + ' messages)', function(done) {
+                            rooms = test.rooms;
+                            users = test.users;// - 1 because remote rooms generate a user automatically
+                            messages = test.messages;
+                            total = rooms * users * messages;
+                            if (total >= 1000000) {
+                                console.log('You might want to get a cup of coffee...');
+                                report = true;
+                            }
+                            stress(rooms, users, messages, done, createRemoteRooms);
+                    });
                 });
             });
         });
     });
 });
-
 
