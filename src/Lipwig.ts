@@ -190,7 +190,9 @@ class Lipwig extends EventManager {
     }
 
     private create(connection: WebSocket.connection, message: Message): ErrorCode {
+        console.log(message);
         const options: RoomOptions = message.data[0] || {};
+        console.log(options);
         if (typeof options !== 'object') {
             return ErrorCode.MALFORMED;
         }
