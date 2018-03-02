@@ -2,6 +2,7 @@
  * @author: William Hayward
  */
 import * as http from 'http';
+import * as https from 'https';
 
 export enum ErrorCode {
     SUCCESS = 0,
@@ -25,7 +26,7 @@ type LipwigOptionsRaw = {
     port: number;
     roomNumberLimit: number;
     roomSizeLimit: number;
-    http: http.Server;
+    http: http.Server | https.Server | (http.Server | https.Server)[];
     name: string;
 };
 

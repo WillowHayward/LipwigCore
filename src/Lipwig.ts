@@ -2,6 +2,7 @@
  * @author: William Hayward
  */
 import * as http from 'http';
+import * as https from 'https';
 import * as WebSocket from 'websocket';
 import { Client } from './Client';
 import { EventManager } from './EventManager';
@@ -81,14 +82,28 @@ class Lipwig extends EventManager {
     }
 
     public exit(): void {
-        this.options.http.close();
+        if (this.options.http instanceof http.Server || this.options.http instanceof https.Server) {
+            this.options.http.close();
+
+            this.options.http.on('close', (): void => {
+                this.emit('closed');
+            });
+        } else {
+            const httpList: (http.Server | https.Server)[] = (<(http.Server | https.Server)[]>this.options.http);
+            // Cast to array for type safety
+            httpList.forEach((instance: http.Server | https.Server): void => {
+                instance.close();
+                instance.on('close', (): void => {
+                    // TODO: This might emit before all http instances are closed
+                    this.emit('closed');
+                });
+            });
+        }
+
         this.connections.slice(0).forEach((socket: WebSocket.connection): void => {
             if (socket.connected) {
                 socket.close();
             }
-        });
-        this.options.http.on('close', (): void => {
-            this.emit('closed');
         });
     }
 
@@ -178,6 +193,7 @@ class Lipwig extends EventManager {
 
     private isOriginAllowed(origin: string): boolean {
         // TODO: Origin checking
+
         return true;
     }
 

@@ -77,7 +77,6 @@ export class Room {
 
             if (this.options.remote) {
                 message.data[0] = user;
-                // TODO: This should be before the user ID, but there's a lot of things to change with that
                 this.remoteHost.handle(message);
             } else {
                 this.host.send(message);
