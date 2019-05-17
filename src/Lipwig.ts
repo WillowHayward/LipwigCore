@@ -79,6 +79,7 @@ class Lipwig extends EventManager {
         this.reserve('reconnect', this.reconnect);
         this.reserve('close', this.close);
         this.reserve('kick', this.kick);
+        this.reserve('lw-ping', this.ping);
     }
 
     public exit(): void {
@@ -205,10 +206,16 @@ class Lipwig extends EventManager {
         return this.route(message);
     }
 
+    private ping(connection: WebSocket.connection, message: Message): ErrorCode {
+        message.event = 'pong';
+        const text: string = JSON.stringify(message);
+        connection.send(text);
+
+        return ErrorCode.SUCCESS;
+    }
+
     private create(connection: WebSocket.connection, message: Message): ErrorCode {
-        console.log(message);
         const options: RoomOptions = message.data[0] || {};
-        console.log(options);
         if (typeof options !== 'object') {
             return ErrorCode.MALFORMED;
         }
