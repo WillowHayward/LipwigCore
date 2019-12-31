@@ -38,6 +38,7 @@ module.exports = function(grunt) {
     // Default task(s).
     grunt.registerTask('build', ['tslint', 'exec:tsc', 'exec:mocha']);
     grunt.registerTask('stress', ['tslint', 'exec:tsc', 'exec:stress']);
+    grunt.registerTask('quick', ['exec:tsc']);
     grunt.registerTask('full', ['tslint', 'exec']);
     grunt.registerTask('default', ['build']);
   };

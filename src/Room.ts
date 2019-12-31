@@ -69,7 +69,7 @@ export class Room {
         if (error === ErrorCode.SUCCESS) {
             const message: Message = {
                 event: 'joined',
-                data: [this.id + user.getID(), this.options.name],
+                data: [this.id + user.getID(), data.name], //TODO: Generalise
                 sender: '',
                 recipient: ['']
             };
