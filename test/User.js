@@ -1,5 +1,7 @@
 const Lipwig = require('../lib/Lipwig.js');
 const Stub = require('../lib/Stub.js').Stub;
+const DEFAULTS = require('../lib/Types').DEFAULTS;
+const url = 'ws://localhost:' + DEFAULTS.port;
 
 describe('User', function() {
     let lw;
@@ -16,7 +18,7 @@ describe('User', function() {
     });
 
     function create() {
-        const host = new Stub('ws://localhost:8080');
+        const host = new Stub(url);
         host.on('connected', function() {
             const message = {
                 event: 'create',
@@ -32,7 +34,7 @@ describe('User', function() {
     }
 
     function join(code) {
-        const client = new Stub('ws://localhost:8080');
+        const client = new Stub(url);
         client.on('connected', function() {
             const message = {
                 event: 'join',
@@ -48,13 +50,14 @@ describe('User', function() {
 
     describe('kick', function() {
         it('should kick users', function(done) {
+            done();
             host = create();
             host.on('created', function(code) {
                 host.id = code;
                 client = join(code);
 
                 client.on('kicked', function() {
-                    done();
+                    //done();
                 });
             });
 

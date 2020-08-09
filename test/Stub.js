@@ -1,5 +1,8 @@
 const Lipwig = require('../lib/Lipwig.js');
 const Stub = require('../lib/Stub.js').Stub;
+const DEFAULTS = require('../lib/Types').DEFAULTS;
+const url = 'ws://localhost:' + DEFAULTS.port;
+
 let lw;
 describe('Stub', function() {
     before(function(done) {
@@ -15,14 +18,14 @@ describe('Stub', function() {
     });
 
     it('should be able to connect', function(done) {
-        const user = new Stub('ws://localhost:8080');
+        const user = new Stub(url);
         user.on('connected', function() {
             done();
         });
     });
 
     it('should be able to create rooms', function(done) {
-        const host = new Stub('ws://localhost:8080');
+        const host = new Stub(url);
         host.on('connected', function() {
             const message = {
                 event: 'create',
@@ -40,7 +43,7 @@ describe('Stub', function() {
     });
 
     it('should be able to join rooms', function(done) {
-        const host = new Stub('ws://localhost:8080');
+        const host = new Stub(url);
         host.on('connected', function() {
             const message = {
                 event: 'create',
@@ -53,8 +56,8 @@ describe('Stub', function() {
         });
 
         host.on('created', function(code) {
-            const client = new Stub('ws://localhost:8080');
-            client.on('connected', function() {
+            const client = new Stub(url);
+            client.on('connected', function(id) {
                 const message = {
                     event: 'join',
                     data: [code],
@@ -64,6 +67,9 @@ describe('Stub', function() {
                 client.send(message);
                 client.on('joined', function() {
                     done();
+                });
+                client.on('error', function(code) {
+                  done(code);
                 });
             });
         });

@@ -8,37 +8,29 @@ import { Client } from './Client';
 import { EventManager } from './EventManager';
 import { Host } from './Host';
 import { Room } from './Room';
-import { ErrorCode, LipwigOptions, Message, RoomOptions, UserOptions } from './Types';
+import { DEFAULTS, ErrorCode, LipwigOptions, LipwigConfig, Message, RoomConfig, UserOptions } from './Types';
 import { User } from './User';
 import { Utility } from './Utility';
 
 type WebSocketMessage = {
-    type: string; // tslint:disable-line:no-reserved-keywords
+    type: string;
     utf8Data: string;
-};
-
-type StringMap = {
-    [index: string]: string;
-};
-
-type FunctionMap = {
-    [index: string]: Function;
 };
 
 type RoomMap = {
     [index: string]: Room;
 };
 
-class Lipwig extends EventManager {
+class Lipwig extends EventManager<ErrorCode> {
     private options: LipwigOptions;
     private ws: WebSocket.server;
     private rooms: RoomMap;
-    private reserved: FunctionMap;
+    private reserved: EventManager<ErrorCode>;
     private connections: WebSocket.connection[];
-    constructor(options: LipwigOptions = {}) {
+    constructor(options: LipwigConfig = {}) {
         super();
         options.name = options.name || '';
-        options.port = options.port || 8080;
+        options.port = options.port || DEFAULTS.port;
         options.roomNumberLimit = options.roomNumberLimit || 0;
         options.roomSizeLimit = options.roomSizeLimit || 0;
 
@@ -46,6 +38,7 @@ class Lipwig extends EventManager {
             const server: http.Server = http.createServer();
 
             server.on('error', (err: Error): void => {
+                console.log(err);
                 console.log('Port ' + options.port + ' in use');
             });
 
@@ -59,27 +52,27 @@ class Lipwig extends EventManager {
             this.emit('started');
         }
 
-        this.options = options;
+      this.options = <LipwigOptions> options;
 
-        this.ws = new WebSocket.server({
-            httpServer: options.http,
-            autoAcceptConnections: false
-        });
+      this.ws = new WebSocket.server({
+          httpServer: options.http,
+          autoAcceptConnections: false
+      });
 
-        this.ws.on('request', (request: WebSocket.request): void => {
-            this.newRequest(request);
-        });
+      this.ws.on('request', (request: WebSocket.request): void => {
+        this.newRequest(request);
+      });
 
-        this.rooms = {};
-        this.reserved = {};
-        this.connections = [];
+      this.rooms = {};
+      this.connections = [];
+      this.reserved = new EventManager<ErrorCode>();
 
-        this.reserve('create', this.create);
-        this.reserve('join', this.join);
-        this.reserve('reconnect', this.reconnect);
-        this.reserve('close', this.close);
-        this.reserve('kick', this.kick);
-        this.reserve('lw-ping', this.ping);
+      this.reserved.on('create', this.create, {object: this});
+      this.reserved.on('join', this.join, {object: this});
+      this.reserved.on('reconnect', this.reconnect, {object: this});
+      this.reserved.on('close', this.close, {object: this});
+      this.reserved.on('kick', this.kick, {object: this});
+      this.reserved.on('lw-ping', this.ping, {object: this});
     }
 
     public exit(): void {
@@ -108,10 +101,6 @@ class Lipwig extends EventManager {
         });
     }
 
-    private reserve(event: string, callback: Function): void {
-        this.reserved[event] = callback.bind(this);
-    }
-
     private newRequest(request: WebSocket.request): void {
         if (!this.isOriginAllowed(request.origin)) {
             request.reject();
@@ -121,14 +110,14 @@ class Lipwig extends EventManager {
 
         const connection: WebSocket.connection = request.accept(request.requestedProtocols[0], request.origin);
         this.connections.push(connection);
-        connection.on('message', (message: WebSocketMessage): void => {
-            const text: string = message.utf8Data.toString();
+        connection.on('message', (message: WebSocket.IMessage): void => {
+            const text: string = message.utf8Data!.toString();
             const parsed: Message | ErrorCode = this.getMessage(text);
 
             if (typeof parsed === 'number') {
                 // ErrorCode
                 const error: ErrorCode = parsed;
-                this.reportError(connection, error, message.utf8Data);
+                this.reportError(connection, error, text);
 
                 return;
             }
@@ -194,13 +183,20 @@ class Lipwig extends EventManager {
 
     private isOriginAllowed(origin: string): boolean {
         // TODO: Origin checking
+        if (origin) {
+          return true;
+        }
 
         return true;
     }
 
     private handle(message: Message, connection: WebSocket.connection): ErrorCode {
-        if (message.event in this.reserved) {
-            return this.reserved[message.event](connection, message);
+        if (this.reserved.contains(message.event)) {
+          
+          const callback = this.reserved.get(message.event);
+          const response = <ErrorCode> callback(connection, message);
+          
+          return response;
         }
 
         return this.route(message);
@@ -215,7 +211,7 @@ class Lipwig extends EventManager {
     }
 
     private create(connection: WebSocket.connection, message: Message): ErrorCode {
-        const options: RoomOptions = message.data[0] || {};
+        const options: RoomConfig = <RoomConfig> message.data[0] || {};
         if (typeof options !== 'object') {
             return ErrorCode.MALFORMED;
         }
@@ -223,28 +219,29 @@ class Lipwig extends EventManager {
         let id: string;
         do {
             id = Utility.generateString();
-        } while (this.rooms[id] !== undefined);
+        } while (this.find(id) !== undefined);
 
         const room: Room = new Room(id, connection, options);
         this.rooms[id] = room;
 
-        if (room.isRemote()) {
-            const host: Host = room.getRemoteHost();
-            const creator: Client = room.getRemoteCreator();
-            this.emit('created', host, creator);
-        }
+        //if (room.isRemote()) {
+            //const host: Host = room.getRemoteHost();
+            //const creator: Client = room.getRemoteCreator();
+            //this.emit('created', host, creator);
+        //}
 
         return ErrorCode.SUCCESS;
     }
 
     private join(connection: WebSocket.connection, message: Message): ErrorCode {
-        const code: string = message.data[0];
 
-        if (typeof code !== 'string') {
+        if (typeof message.data[0] !== 'string') {
             return ErrorCode.MALFORMED;
         }
 
-        let data: UserOptions = message.data[1];
+        const code: string = message.data[0];
+
+        let data: UserOptions = <UserOptions> message.data[1];
 
         if (data === undefined) {
             data = {};
@@ -254,13 +251,22 @@ class Lipwig extends EventManager {
             return ErrorCode.MALFORMED;
         }
 
-        const room: Room = this.rooms[code];
+        const room: Room | undefined = this.find(code);
 
         if (room === undefined) {
             return ErrorCode.ROOMNOTFOUND;
         }
 
-        if (!room.checkPassword(data.password)) {
+        if (data.password === undefined) {
+          data.password = '';
+        }
+
+        if (typeof data.password !== 'string') {
+          return ErrorCode.MALFORMED;
+        }
+
+        const password = data.password;
+        if (!room.checkPassword(password)) {
             return ErrorCode.INCORRECTPASSWORD;
         }
         delete data.password;
@@ -269,9 +275,13 @@ class Lipwig extends EventManager {
     }
 
     private reconnect(connection: WebSocket.connection, message: Message): ErrorCode {
+        if (typeof message.data[0] !== 'string') {
+          return ErrorCode.MALFORMED;
+        }
+
         const id: string = message.data[0];
         const code: string = id.slice(0, 4);
-        const room: Room = this.rooms[code];
+        const room: Room | undefined = this.find(code);
 
         if (room === undefined) {
             return ErrorCode.ROOMNOTFOUND;
@@ -281,9 +291,13 @@ class Lipwig extends EventManager {
     }
 
     private close(connection: WebSocket.connection, message: Message): ErrorCode {
+        if (typeof message.data[0] !== 'string') {
+          return ErrorCode.MALFORMED;
+        }
+
         const reason: string = message.data[0];
         const id: string = message.sender;
-        const room: Room = this.rooms[id];
+        const room: Room | undefined = this.find(id);
 
         if (room === undefined) {
             return ErrorCode.ROOMNOTFOUND;
@@ -293,7 +307,7 @@ class Lipwig extends EventManager {
             return ErrorCode.INSUFFICIENTPERMISSIONS;
         }
 
-        const user: User = room.find(id);
+        const user: User | undefined = room.find(id);
 
         if (user === undefined) {
             return ErrorCode.USERNOTFOUND;
@@ -310,10 +324,18 @@ class Lipwig extends EventManager {
     }
 
     private kick(connection: WebSocket.connection, message: Message): ErrorCode {
+        if (typeof message.data[0] !== 'string') {
+          return ErrorCode.MALFORMED;
+        }
+
+        if (typeof message.data[1] !== 'string') {
+          return ErrorCode.MALFORMED;
+        }
+
         const userID: string = message.data[0];
         const reason: string = message.data[1];
         const id: string = message.sender;
-        const room: Room = this.rooms[id];
+        const room: Room | undefined = this.find(id);
 
         if (room === undefined) {
             return ErrorCode.ROOMNOTFOUND;
@@ -323,9 +345,9 @@ class Lipwig extends EventManager {
             return ErrorCode.INSUFFICIENTPERMISSIONS;
         }
 
-        const user: User = room.find(id);
+        const user: User | undefined = room.find(id);
 
-        if (user === null) {
+        if (user === undefined) {
             return ErrorCode.USERNOTFOUND;
         }
 
@@ -338,13 +360,17 @@ class Lipwig extends EventManager {
 
     private route(message: Message): ErrorCode {
         const roomID: string = message.sender.slice(0, 4);
-        const room: Room = this.rooms[roomID];
+        const room: Room | undefined = this.find(roomID);
 
         if (room === undefined) {
             return ErrorCode.ROOMNOTFOUND;
         }
 
         return room.route(message);
+    }
+
+    private find(code: string): Room | undefined {
+      return this.rooms[code];
     }
 }
 

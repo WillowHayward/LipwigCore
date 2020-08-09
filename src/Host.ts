@@ -3,9 +3,9 @@
  * @author: William Hayward
  */
 import { EventManager } from './EventManager';
-import { Message } from './Types';
+import { Message, ErrorCode } from './Types';
 
-export class Host extends EventManager {
+export class Host extends EventManager<ErrorCode> {
     private id: string;
     constructor(id: string) {
         super();
@@ -17,10 +17,9 @@ export class Host extends EventManager {
     }
 
     public handle(message: Message): void {
-        const args: any[] = message.data; // tslint:disable-line:no-any
-        args.unshift(message.event);
+        const args: unknown[] = message.data;
         args.push(message);
 
-        this.emit.apply(this, args);
+        this.emit(message.event, ...args);
     }
 }

@@ -4,10 +4,10 @@
  */
 import * as WebSocket from 'websocket';
 import { EventManager } from './EventManager';
-import { Message } from './Types';
+import { Message, ErrorCode } from './Types';
 
-export class Stub extends EventManager {
-    private socket: WebSocket.connection;
+export class Stub extends EventManager<ErrorCode> {
+    private socket: WebSocket.connection | null;
     private queue: Message[];
     constructor(url: string) {
         super();
@@ -41,10 +41,10 @@ export class Stub extends EventManager {
     }
 
     public handle(evt: WebSocket.IMessage): void {
-        const message: Message = JSON.parse(evt.utf8Data);
-        const args: any[] = message.data || []; // tslint:disable-line:no-any
-        args.unshift(message.event);
+        const rawMessage = <string> evt.utf8Data;
+        const message: Message = JSON.parse(rawMessage);
+        const args: unknown[] = message.data;
         args.push(message);
-        this.emit.apply(this, args);
+        this.emit(message.event, ...args);
     }
 }

@@ -3,10 +3,10 @@
  * @author: William Hayward
  */
 import { EventManager } from './EventManager';
-import { Message } from './Types';
+import { Message, ErrorCode } from './Types';
 import { User } from './User';
 
-export class Client extends EventManager {
+export class Client extends EventManager<ErrorCode> {
     private user: User;
     constructor(user: User) {
         super();
@@ -14,17 +14,16 @@ export class Client extends EventManager {
     }
 
     public handle(message: Message): void {
-        const args: any[] = message.data; // tslint:disable-line:no-any
-        args.unshift(message.event);
+        const args: unknown[] = message.data;
         args.push(message);
-
-        this.emit.apply(this, args);
+     
+        this.emit(message.event, ...args);
     }
 
-    public send(event: string, ...args: any[]): void { // tslint:disable-line:no-any
+    public send(event: string, ...args: unknown[]): void {
         const message: Message = {
             event: event,
-            data: args,
+            data: [...args],
             sender: this.user.getID(),
             recipient: []
         };

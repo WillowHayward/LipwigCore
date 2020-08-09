@@ -8,21 +8,21 @@ import { Message } from './Types';
 export class User {
     private id: string;
     private socket: WebSocket.connection;
-    private queue: Message[];
+    private queue: Message[] = [];
     private client: Client;
     constructor(id: string, socket: WebSocket.connection) {
         this.id = id;
 
         if (socket === null) {
-            return;
+            throw new TypeError("User must have socket");
         }
         this.socket = socket;
 
-        this.socket.on('close', (code: number, desc: string): void => {
+        this.socket.on('close', (): void => {
             this.socket.removeAllListeners();
-            this.socket = null;
-            this.queue = [];
         });
+
+        this.client = new Client(this);
     }
 
     public getID(): string {
@@ -30,10 +30,6 @@ export class User {
     }
 
     public getClient(): Client {
-        if (this.client === undefined) {
-            this.client = new Client(this);
-        }
-
         return this.client;
     }
 

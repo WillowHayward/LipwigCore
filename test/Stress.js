@@ -2,6 +2,9 @@ var assert = require('assert');
 const Lipwig = require('../lib/Lipwig.js');
 const Stub = require('../lib/Stub.js').Stub;
 
+const DEFAULTS = require('../lib/Types').DEFAULTS;
+const url = 'ws://localhost:' + DEFAULTS.port;
+
 describe('Stress', function() {
     this.timeout(0);
     let lw;
@@ -31,7 +34,7 @@ describe('Stress', function() {
     function create(options) {
         options = options || {};
 
-        const host = new Stub('ws://localhost:8080');
+        const host = new Stub(url);
         host.on('connected', function() {
             const message = {
                 event: 'create',
@@ -50,7 +53,7 @@ describe('Stress', function() {
         if (data === undefined) {
             data = {};
         }
-        const client = new Stub('ws://localhost:8080');
+        const client = new Stub(url);
         client.on('connected', function() {
             const message = {
                 event: 'join',

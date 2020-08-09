@@ -4,6 +4,9 @@ const User = require('../lib/User.js').User;
 const Lipwig = require('../lib/Lipwig.js');
 const ErrorCode = require('../lib/Types.js').ErrorCode;
 const Stub = require('../lib/Stub.js').Stub;
+const DEFAULTS = require('../lib/Types').DEFAULTS;
+
+const url = 'ws://localhost:' + DEFAULTS.port;
 
 
 let room;
@@ -31,7 +34,7 @@ describe('Room', function() {
             options = {};
         }
 
-        const host = new Stub('ws://localhost:8080');
+        const host = new Stub(url);
         host.on('connected', function() {
             const message = {
                 event: 'create',
@@ -50,7 +53,7 @@ describe('Room', function() {
         if (data === undefined) {
             data = {};
         }
-        const client = new Stub('ws://localhost:8080');
+        const client = new Stub(url);
         client.on('connected', function() {
             const message = {
                 event: 'join',

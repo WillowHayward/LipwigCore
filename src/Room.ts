@@ -4,7 +4,7 @@
 import { connection as WebSocketConnection } from 'websocket'; // TODO: This is just for the types, not used at any point
 import { Client } from './Client';
 import { Host } from './Host';
-import { ErrorCode, Message, RoomOptions, UserOptions } from './Types';
+import { ErrorCode, Message, RoomOptions, RoomConfig, UserOptions } from './Types';
 import { User } from './User';
 import { Utility } from './Utility';
 
@@ -15,17 +15,17 @@ type UserMap = {
 export class Room {
     private options: RoomOptions;
     private host: User;
-    private remoteHost: Host;
-    private creator: User;
+    //private remoteHost: Host;
+    //private creator: User;
     private users: UserMap;
     private id: string;
-    constructor(id: string, host: WebSocketConnection, options: RoomOptions) {
+    constructor(id: string, host: WebSocketConnection, options: RoomConfig) {
         options.name = options.name || '';
         options.password = options.password || '';
         options.size = options.size || 8;
         options.remote = options.remote || false;
 
-        this.options = options;
+        this.options = <RoomOptions> options;
 
         this.id = id;
         this.users = {};
@@ -37,7 +37,11 @@ export class Room {
             recipient: []
         };
 
-        if (this.options.remote) {
+        /*TODO: The host/remoteHost divide is awkward. Make HostUser class to 
+            compress host and creator, and maybe have that class ping the Host
+            class - that way you wouldn't need remoteHost or any reference to 
+            the Host class */
+        /*if (this.options.remote) {
             const userID: string = Utility.generateString();
             this.creator = new User(userID, host);
             this.add(this.creator);
@@ -49,10 +53,9 @@ export class Room {
 
             message.data = [this.remoteHost, this.creator.getClient()];
             this.remoteHost.handle(message);
-        } else {
-            this.host = new User('', host);
-            this.host.send(message);
-        }
+        }*/
+        this.host = new User('', host);
+        this.host.send(message);
     }
 
     public join(socket: WebSocketConnection, data: UserOptions): ErrorCode {
@@ -75,12 +78,12 @@ export class Room {
             };
             user.send(message);
 
-            if (this.options.remote) {
+            /*if (this.options.remote) {
                 message.data[0] = user;
                 this.remoteHost.handle(message);
-            } else {
-                this.host.send(message);
-            }
+            } else {*/
+            this.host.send(message);
+          //}
         }
 
         return error;
@@ -118,19 +121,15 @@ export class Room {
         return ErrorCode.SUCCESS;
     }
 
-    public find(userID: string): User {
+    public find(userID: string): User | undefined {
         if (userID === this.id) {
             if (this.options.remote) {
-                return null;
+                return undefined;
             }
 
             return this.host;
         }
         const user: User = this.users[userID];
-
-        if (user === undefined) {
-            return null;
-        }
 
         return user;
     }
@@ -139,7 +138,7 @@ export class Room {
         return Object.keys(this.users).length;
     }
 
-    public getRemoteHost(): Host {
+    /*public getRemoteHost(): Host {
         return this.remoteHost;
     }
 
@@ -149,24 +148,24 @@ export class Room {
 
     public isRemote(): boolean {
         return this.options.remote;
-    }
+    }*/
 
     public route(message: Message): ErrorCode {
         const users: User[] = [];
-        let missingUser: boolean = false;
+        let missingUser = false;
         if (message.sender !== this.id) {
-            const origin: User = this.find(message.sender.slice(4, 8));
+            const origin: User | undefined = this.find(message.sender.slice(4, 8));
 
-            if (origin === null) {
+            if (origin === undefined) {
                 return ErrorCode.USERNOTFOUND;
             }
 
-            if (this.options.remote) {
+            /*if (this.options.remote) {
                 message.data.unshift(origin.getClient());
                 this.remoteHost.handle(message);
-            } else {
+            } else {*/
                 this.host.send(message);
-            }
+            //}
 
             return ErrorCode.SUCCESS;
         }
@@ -213,12 +212,12 @@ export class Room {
         });
 
         message.recipient = [this.id];
-        if (this.options.remote) {
+        /*if (this.options.remote) {
             this.remoteHost.handle(message);
-        } else {
+        } else {*/
             this.host.send(message);
             this.host.close();
-        }
+        //}
     }
 
     public kick(id: string, reason: string) : ErrorCode {

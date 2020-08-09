@@ -15,14 +15,14 @@ export enum ErrorCode {
 }
 
 export type Message = {
-    [key: string]: any; // tslint:disable-line:no-any
+    [key: string]: unknown;
     event: string;
-    data: any[]; // tslint:disable-line:no-any
+    data: unknown[];
     recipient: string[];
     sender: string;
 };
 
-type LipwigOptionsRaw = {
+export type LipwigOptions = {
     port: number;
     roomNumberLimit: number;
     roomSizeLimit: number;
@@ -30,17 +30,22 @@ type LipwigOptionsRaw = {
     name: string;
 };
 
-export type LipwigOptions = Partial<LipwigOptionsRaw>;
+export type LipwigConfig = Partial<LipwigOptions>;
 
-export type RoomOptionsRaw = {
+export type RoomOptions = {
     size: number;
     password: string;
     name: string;
     remote: boolean;
 };
 
-export type RoomOptions = Partial<RoomOptionsRaw>;
+export type RoomConfig = Partial<RoomOptions>;
 
 export type UserOptions = {
-    [index: string]: any; // tslint:disable-line:no-any
+    [index: string]: unknown;
 };
+
+export const DEFAULTS = {
+     port: 8989
+};
+
