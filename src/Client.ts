@@ -2,11 +2,11 @@
  * Client of a remote room
  * @author: William Hayward
  */
-import { EventManager } from './EventManager';
+import { EventManager } from 'lipwig-events';
 import { Message, ErrorCode } from './Types';
 import { User } from './User';
 
-export class Client extends EventManager<ErrorCode> {
+export class Client extends EventManager {
     private user: User;
     constructor(user: User) {
         super();

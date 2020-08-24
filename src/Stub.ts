@@ -3,10 +3,10 @@
  * @description: A stub class to allow for testing client connections
  */
 import * as WebSocket from 'websocket';
-import { EventManager } from './EventManager';
+import { EventManager } from 'lipwig-events';
 import { Message, ErrorCode } from './Types';
 
-export class Stub extends EventManager<ErrorCode> {
+export class Stub extends EventManager {
     private socket: WebSocket.connection | null;
     private queue: Message[];
     constructor(url: string) {

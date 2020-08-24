@@ -4,8 +4,9 @@
 import * as http from 'http';
 import * as https from 'https';
 import * as WebSocket from 'websocket';
+import { EventManager } from 'lipwig-events';
 import { Client } from './Client';
-import { EventManager } from './EventManager';
+//import { EventManager } from './EventManager';
 import { Host } from './Host';
 import { Room } from './Room';
 import { DEFAULTS, ErrorCode, LipwigOptions, LipwigConfig, Message, RoomConfig, UserOptions } from './Types';
@@ -21,11 +22,11 @@ type RoomMap = {
     [index: string]: Room;
 };
 
-class Lipwig extends EventManager<ErrorCode> {
+class Lipwig extends EventManager {
     private options: LipwigOptions;
     private ws: WebSocket.server;
     private rooms: RoomMap;
-    private reserved: EventManager<ErrorCode>;
+    private reserved: EventManager;
     private connections: WebSocket.connection[];
     constructor(options: LipwigConfig = {}) {
         super();
@@ -65,7 +66,7 @@ class Lipwig extends EventManager<ErrorCode> {
 
       this.rooms = {};
       this.connections = [];
-      this.reserved = new EventManager<ErrorCode>();
+      this.reserved = new EventManager();
 
       this.reserved.on('create', this.create, {object: this});
       this.reserved.on('join', this.join, {object: this});

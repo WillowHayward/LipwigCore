@@ -2,10 +2,10 @@
  * Host of a remote room
  * @author: William Hayward
  */
-import { EventManager } from './EventManager';
+import { EventManager } from 'lipwig-events';
 import { Message, ErrorCode } from './Types';
 
-export class Host extends EventManager<ErrorCode> {
+export class Host extends EventManager {
     private id: string;
     constructor(id: string) {
         super();
