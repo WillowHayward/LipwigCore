@@ -5,10 +5,8 @@ import * as http from 'http';
 import * as https from 'https';
 import * as WebSocket from 'websocket';
 import * as winston from 'winston';
+import { Dashboard } from './Dashboard';
 import { EventManager } from 'lipwig-events';
-import { Client } from './Client';
-//import { EventManager } from './EventManager';
-import { Host } from './Host';
 import { Room } from './Room';
 import { DEFAULTS, ErrorCode, LipwigOptions, LipwigConfig, Message, RoomConfig, UserOptions } from './Types';
 import { User } from './User';
@@ -59,11 +57,13 @@ class Lipwig extends EventManager {
 
             server.listen(options.port, () => {
                 console.log('Listening on ' + options.port);
+                new Dashboard(server);
                 this.emit('started');
             });
 
             options.http = server;
         } else {
+            new Dashboard(options.http);
             this.emit('started');
         }
 

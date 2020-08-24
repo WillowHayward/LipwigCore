@@ -26,7 +26,7 @@ export type LipwigOptions = {
     port: number;
     roomNumberLimit: number;
     roomSizeLimit: number;
-    http: http.Server | https.Server | (http.Server | https.Server)[];
+    http: http.Server | https.Server;
     name: string;
 };
 
