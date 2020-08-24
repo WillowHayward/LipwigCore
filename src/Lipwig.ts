@@ -4,6 +4,7 @@
 import * as http from 'http';
 import * as https from 'https';
 import * as WebSocket from 'websocket';
+import * as winston from 'winston';
 import { EventManager } from 'lipwig-events';
 import { Client } from './Client';
 //import { EventManager } from './EventManager';
@@ -23,6 +24,7 @@ type RoomMap = {
 };
 
 class Lipwig extends EventManager {
+    private logger: winston.Logger;
     private options: LipwigOptions;
     private ws: WebSocket.server;
     private rooms: RoomMap;
@@ -30,6 +32,18 @@ class Lipwig extends EventManager {
     private connections: WebSocket.connection[];
     constructor(options: LipwigConfig = {}) {
         super();
+        this.logger = winston.createLogger({
+          format: winston.format.combine(
+            winston.format.timestamp(),
+            winston.format.json()
+          ),
+          transports: [
+            new winston.transports.Console(),
+            new winston.transports.File({ 
+              filename: 'combined.log', 
+            }),
+          ]
+        });
         options.name = options.name || '';
         options.port = options.port || DEFAULTS.port;
         options.roomNumberLimit = options.roomNumberLimit || 0;
@@ -125,7 +139,12 @@ class Lipwig extends EventManager {
 
             const response: ErrorCode = this.handle(parsed, connection);
 
-            if (response !== ErrorCode.SUCCESS) {
+            if (response == ErrorCode.SUCCESS) {
+                this.logger.log({
+                    'level': 'info',
+                    'message': text
+                });
+            } else {
                 this.reportError(connection, response, text);
             }
         });
@@ -179,6 +198,10 @@ class Lipwig extends EventManager {
             recipient: []
         };
         const text: string = JSON.stringify(message);
+        this.logger.log({
+          'level': 'error', 
+          'message': text
+        });
         connection.send(text);
     }
 
