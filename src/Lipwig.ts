@@ -5,7 +5,8 @@ import * as http from 'http';
 import * as https from 'https';
 import * as WebSocket from 'websocket';
 import * as winston from 'winston';
-import { Dashboard } from './Dashboard';
+import * as wbs from 'winston-better-sqlite3';
+import { Dashboard } from './dash/Dashboard';
 import { EventManager } from 'lipwig-events';
 import { Room } from './Room';
 import { DEFAULTS, ErrorCode, LipwigOptions, LipwigConfig, Message, RoomConfig, UserOptions } from './Types';
@@ -36,10 +37,9 @@ class Lipwig extends EventManager {
             winston.format.json()
           ),
           transports: [
-            new winston.transports.Console(),
-            new winston.transports.File({ 
-              filename: 'combined.log', 
-            }),
+            new wbs({
+              db: 'db.sqlite'
+            })
           ]
         });
         options.name = options.name || '';

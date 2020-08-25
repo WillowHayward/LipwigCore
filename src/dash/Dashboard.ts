@@ -14,7 +14,7 @@ export class Dashboard {
       const app = express();
       this.http.on('request', app);
 
-      app.get('/', (req, res) => {
+      app.get('/admin', (req, res) => {
         res.send('Hello World');
       });
     }
