@@ -26,6 +26,12 @@ class Lipwig extends EventManager {
     private connections: WebSocket.connection[];
     constructor(config: LipwigConfig = {}) {
         super();
+
+       const options: LipwigOptions = {
+         ...defaultConfig,
+         ...config
+       }
+
         this.logger = winston.createLogger({
           format: winston.format.combine(
             winston.format.timestamp(),
@@ -33,15 +39,11 @@ class Lipwig extends EventManager {
           ),
           transports: [
             new wbs({
-              db: 'lipwig.db'
+              db: options.db,
+              table: 'test'
             })
           ]
         });
-
-       const options: LipwigOptions = {
-         ...defaultConfig,
-         ...config
-       }
 
         if (options.http === undefined) {
             const server: http.Server = http.createServer();
@@ -63,7 +65,7 @@ class Lipwig extends EventManager {
             this.emit('started');
         }
 
-      this.options = options;
+        this.options = options;
 
       this.ws = new WebSocket.server({
           httpServer: options.http,

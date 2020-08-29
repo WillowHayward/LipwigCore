@@ -9,7 +9,7 @@ module.exports = function(grunt) {
             lint: 'yarn eslint . --ext .ts'
         },
         clean: {
-            build: ['lib']
+            test: ['lipwig.db.tmp']
         },
         watch: {
             scripts: {
@@ -25,8 +25,8 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-watch');
 
     // Default task(s).
-    grunt.registerTask('build', ['exec:lint', 'exec:tsc', 'exec:mocha']);
-    grunt.registerTask('stress', ['exec:lint', 'exec:tsc', 'exec:stress']);
+    grunt.registerTask('build', ['exec:lint', 'exec:tsc', 'exec:mocha', 'clean']);
+    grunt.registerTask('stress', ['exec:lint', 'exec:tsc', 'exec:stress', 'clean']);
     grunt.registerTask('quick', ['exec:tsc']);
     grunt.registerTask('full', ['exec:lint', 'exec']);
     grunt.registerTask('default', ['build']);

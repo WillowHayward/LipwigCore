@@ -55,3 +55,7 @@ export const defaultConfig: LipwigOptions = {
      db: './lipwig.db',
 };
 
+export const testConfig = {
+  ...defaultConfig,
+  db: './lipwig.db.tmp'
+};

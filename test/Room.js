@@ -4,15 +4,15 @@ const User = require('../lib/User.js').User;
 const Lipwig = require('../lib/Lipwig.js');
 const ErrorCode = require('../lib/Types.js').ErrorCode;
 const Stub = require('../lib/Stub.js').Stub;
-const port = require('../lib/Types').defaultConfig.port;
-const url = 'ws://localhost:' + port;
+const config = require('../lib/Types').testConfig;
+const url = 'ws://localhost:' + config.port;
 
 let room;
 let lw;
 describe('Room', function() {
     let lw;
     before(function(done) {
-        lw = new Lipwig();
+        lw = new Lipwig(config);
         lw.on('started', function() {
             done();
         });

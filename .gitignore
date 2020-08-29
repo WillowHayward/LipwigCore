@@ -4,3 +4,4 @@ dist/
 .DS_Store
 ignore/\
 lipwig.db
+lipwig.config.js

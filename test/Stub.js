@@ -1,13 +1,13 @@
 const Lipwig = require('../lib/Lipwig.js');
 const Stub = require('../lib/Stub.js').Stub;
 
-const port = require('../lib/Types').defaultConfig.port;
-const url = 'ws://localhost:' + port;
+const config = require('../lib/Types').testConfig;
+const url = 'ws://localhost:' + config.port;
 
 let lw;
 describe('Stub', function() {
     before(function(done) {
-        lw = new Lipwig();
+        lw = new Lipwig(config);
         lw.on('started', function() {
             done();
         });
