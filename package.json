@@ -1,6 +1,6 @@
 {
   "name": "lipwig",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "description": "",
   "main": "lib/Lipwig.js",
   "bin": {
@@ -39,5 +39,8 @@
     "websocket": "1.0.31",
     "winston": "3.3.3",
     "winston-better-sqlite3": "https://github.com/WillHayCode/winston-better-sqlite3.git"
-  }
+  },
+
+  "files": ["lib/*", "bin/*"],
+  "prepare": "tsc"
 }
