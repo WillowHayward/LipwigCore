@@ -2,8 +2,8 @@ var assert = require('assert');
 const Lipwig = require('../lib/Lipwig.js');
 const Stub = require('../lib/Stub.js').Stub;
 
-const DEFAULTS = require('../lib/Types').DEFAULTS;
-const url = 'ws://localhost:' + DEFAULTS.port;
+const port = require('../lib/Types').defaultConfig.port;
+const url = 'ws://localhost:' + port;
 
 describe('Stress', function() {
     this.timeout(0);

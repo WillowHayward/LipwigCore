@@ -9,7 +9,7 @@ import * as wbs from 'winston-better-sqlite3';
 import { Dashboard } from './dash/Dashboard';
 import { EventManager } from 'lipwig-events';
 import { Room } from './Room';
-import { DEFAULTS, ErrorCode, LipwigOptions, LipwigConfig, Message, RoomConfig, UserOptions } from './Types';
+import { defaultConfig, ErrorCode, LipwigOptions, LipwigConfig, Message, RoomConfig, UserOptions } from './Types';
 import { User } from './User';
 import { Utility } from './Utility';
 
@@ -24,7 +24,7 @@ class Lipwig extends EventManager {
     private rooms: RoomMap;
     private reserved: EventManager;
     private connections: WebSocket.connection[];
-    constructor(options: LipwigConfig = {}) {
+    constructor(config: LipwigConfig = {}) {
         super();
         this.logger = winston.createLogger({
           format: winston.format.combine(
@@ -37,10 +37,11 @@ class Lipwig extends EventManager {
             })
           ]
         });
-        options.name = options.name || '';
-        options.port = options.port || DEFAULTS.port;
-        options.roomNumberLimit = options.roomNumberLimit || 0;
-        options.roomSizeLimit = options.roomSizeLimit || 0;
+
+       const options: LipwigOptions = {
+         ...defaultConfig,
+         ...config
+       }
 
         if (options.http === undefined) {
             const server: http.Server = http.createServer();
@@ -62,7 +63,7 @@ class Lipwig extends EventManager {
             this.emit('started');
         }
 
-      this.options = <LipwigOptions> options;
+      this.options = options;
 
       this.ws = new WebSocket.server({
           httpServer: options.http,
@@ -93,7 +94,9 @@ class Lipwig extends EventManager {
                 this.emit('closed');
             });
         } else {
-            const httpList: (http.Server | https.Server)[] = (<(http.Server | https.Server)[]>this.options.http);
+          // This code pertains to server lists, which are current unimplemented
+
+            /*const httpList: (http.Server | https.Server)[] = (<(http.Server | https.Server)[]>this.options.http);
             // Cast to array for type safety
             httpList.forEach((instance: http.Server | https.Server): void => {
                 instance.close();
@@ -101,7 +104,7 @@ class Lipwig extends EventManager {
                     // TODO: This might emit before all http instances are closed
                     this.emit('closed');
                 });
-            });
+            });*/
         }
 
         this.connections.slice(0).forEach((socket: WebSocket.connection): void => {

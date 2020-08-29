@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 "use strict"
+// TODO: Args parsing here, keep the core classes clean
 process.title = 'lipwig';
 process.argv.forEach(function(value, index) {
     if (index === 0) {
