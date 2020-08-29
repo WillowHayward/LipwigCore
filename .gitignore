@@ -3,4 +3,4 @@ build/
 dist/
 .DS_Store
 ignore/\
-db.sqlite
+lipwig.db

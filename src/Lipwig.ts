@@ -13,11 +13,6 @@ import { DEFAULTS, ErrorCode, LipwigOptions, LipwigConfig, Message, RoomConfig, 
 import { User } from './User';
 import { Utility } from './Utility';
 
-type WebSocketMessage = {
-    type: string;
-    utf8Data: string;
-};
-
 type RoomMap = {
     [index: string]: Room;
 };
@@ -38,7 +33,7 @@ class Lipwig extends EventManager {
           ),
           transports: [
             new wbs({
-              db: 'db.sqlite'
+              db: 'lipwig.db'
             })
           ]
         });
