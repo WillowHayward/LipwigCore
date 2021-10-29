@@ -5,7 +5,7 @@ import * as http from 'http';
 import * as https from 'https';
 import * as WebSocket from 'websocket';
 import * as winston from 'winston';
-import * as wbs from 'winston-better-sqlite3';
+//import * as wbs from 'winston-better-sqlite3';
 import { Dashboard } from './dash/Dashboard';
 import { EventManager } from 'lipwig-events';
 import { Room } from './Room';
@@ -38,10 +38,11 @@ class Lipwig extends EventManager {
             winston.format.json()
           ),
           transports: [
-            new wbs({
+            /*new wbs({
               db: options.db,
               table: 'test'
-            })
+            })*/
+           //new winston.transports.Console()
           ]
         });
 
