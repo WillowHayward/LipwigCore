@@ -42,7 +42,7 @@ class Lipwig extends EventManager {
               db: options.db,
               table: 'test'
             })*/
-           //new winston.transports.Console()
+            new winston.transports.Console()
           ]
         });
 
