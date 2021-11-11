@@ -6,7 +6,6 @@ import * as https from 'https';
 import * as WebSocket from 'websocket';
 import * as winston from 'winston';
 //import * as wbs from 'winston-better-sqlite3';
-import { Dashboard } from './dash/Dashboard';
 import { EventManager } from 'lipwig-events';
 import { Room } from './Room';
 import { defaultConfig, ErrorCode, LipwigOptions, LipwigConfig, Message, RoomConfig, UserOptions } from './Types';
@@ -56,13 +55,11 @@ class Lipwig extends EventManager {
 
             server.listen(options.port, () => {
                 console.log('Listening on ' + options.port);
-                new Dashboard(server);
                 this.emit('started');
             });
 
             options.http = server;
         } else {
-            new Dashboard(options.http);
             this.emit('started');
         }
 
@@ -224,7 +221,14 @@ class Lipwig extends EventManager {
           return response;
         }
 
-        return this.route(message);
+        const roomID: string = message.sender.slice(0, 4);
+        const room: Room | undefined = this.find(roomID);
+
+        if (room === undefined) {
+            return ErrorCode.ROOMNOTFOUND;
+        }
+
+        return room.route(message);
     }
 
     private ping(connection: WebSocket.connection, message: Message): ErrorCode {
@@ -381,17 +385,6 @@ class Lipwig extends EventManager {
         }
 
         return room.kick(userID, reason);
-    }
-
-    private route(message: Message): ErrorCode {
-        const roomID: string = message.sender.slice(0, 4);
-        const room: Room | undefined = this.find(roomID);
-
-        if (room === undefined) {
-            return ErrorCode.ROOMNOTFOUND;
-        }
-
-        return room.route(message);
     }
 
     private find(code: string): Room | undefined {
