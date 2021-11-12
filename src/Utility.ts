@@ -1,5 +1,5 @@
 /**
- * @author: William Hayward
+ * @author: WillHayCode
  */
 const alphabet= 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 

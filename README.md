@@ -36,4 +36,4 @@ Lipwig can also be run from commandline by installing lipwig globally using `npm
 
 Then you can start the server using `lipwig` in your commandline.
 
-To start developing users for Lipwig, you'll need to use the [Lipwig JavaScript library](https://github.com/WilliamHayward/LipwigJS)
+To start developing users for Lipwig, you'll need to use the [Lipwig JavaScript library](https://github.com/WillHayCode/LipwigJS)

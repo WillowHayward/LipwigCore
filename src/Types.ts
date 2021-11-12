@@ -1,5 +1,5 @@
 /**
- * @author: William Hayward
+ * @author: WillHayCode
  */
 import * as http from 'http';
 import * as https from 'https';

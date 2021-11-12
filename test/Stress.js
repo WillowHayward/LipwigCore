@@ -252,7 +252,7 @@ describe('Stress', function() {
                 messages: 100
             }
         ],
-        large: [
+        /*large: [
             {
                 rooms: 1,
                 users: 1,
@@ -273,7 +273,7 @@ describe('Stress', function() {
                 users: 8,
                 messages: 1000
             }
-        ]
+        ]*/
     }
 
     const keys = Object.keys(tests);

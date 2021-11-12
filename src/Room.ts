@@ -1,9 +1,7 @@
 /**
- * @author: William Hayward
+ * @author: WillHayCode
  */
 import { connection as WebSocketConnection } from 'websocket'; // TODO: This is just for the types, not used at any point
-import { Client } from './Client';
-import { Host } from './Host';
 import { ErrorCode, Message, RoomOptions, RoomConfig, UserOptions } from './Types';
 import { User } from './User';
 import { Utility } from './Utility';
@@ -15,8 +13,6 @@ type UserMap = {
 export class Room {
     private options: RoomOptions;
     private host: User;
-    //private remoteHost: Host;
-    //private creator: User;
     private users: UserMap;
     private id: string;
     constructor(id: string, host: WebSocketConnection, options: RoomConfig) {
@@ -37,23 +33,6 @@ export class Room {
             recipient: []
         };
 
-        /*TODO: The host/remoteHost divide is awkward. Make HostUser class to 
-            compress host and creator, and maybe have that class ping the Host
-            class - that way you wouldn't need remoteHost or any reference to 
-            the Host class */
-        /*if (this.options.remote) {
-            const userID: string = Utility.generateString();
-            this.creator = new User(userID, host);
-            this.add(this.creator);
-            message.data.push(id + userID);
-            this.users[userID] = this.creator;
-            this.creator.send(message);
-            this.host = null;
-            this.remoteHost = new Host(id);
-
-            message.data = [this.remoteHost, this.creator.getClient()];
-            this.remoteHost.handle(message);
-        }*/
         this.host = new User('', host);
         this.host.send(message);
     }
@@ -78,12 +57,7 @@ export class Room {
             };
             user.send(message);
 
-            /*if (this.options.remote) {
-                message.data[0] = user;
-                this.remoteHost.handle(message);
-            } else {*/
             this.host.send(message);
-          //}
         }
 
         return error;
@@ -138,18 +112,6 @@ export class Room {
         return Object.keys(this.users).length;
     }
 
-    /*public getRemoteHost(): Host {
-        return this.remoteHost;
-    }
-
-    public getRemoteCreator(): Client {
-        return this.creator.getClient();
-    }
-
-    public isRemote(): boolean {
-        return this.options.remote;
-    }*/
-
     public route(message: Message): ErrorCode {
         const users: User[] = [];
         let missingUser = false;
@@ -160,12 +122,7 @@ export class Room {
                 return ErrorCode.USERNOTFOUND;
             }
 
-            /*if (this.options.remote) {
-                message.data.unshift(origin.getClient());
-                this.remoteHost.handle(message);
-            } else {*/
-                this.host.send(message);
-            //}
+            this.host.send(message);
 
             return ErrorCode.SUCCESS;
         }
@@ -212,12 +169,8 @@ export class Room {
         });
 
         message.recipient = [this.id];
-        /*if (this.options.remote) {
-            this.remoteHost.handle(message);
-        } else {*/
-            this.host.send(message);
-            this.host.close();
-        //}
+        this.host.send(message);
+        this.host.close();
     }
 
     public kick(id: string, reason: string) : ErrorCode {

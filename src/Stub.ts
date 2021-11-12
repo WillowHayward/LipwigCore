@@ -1,5 +1,5 @@
 /**
- * @author: William Hayward
+ * @author: WillHayCode
  * @description: A stub class to allow for testing client connections
  */
 import * as WebSocket from 'websocket';

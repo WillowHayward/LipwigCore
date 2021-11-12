@@ -1,15 +1,13 @@
 /**
- * @author: William Hayward
+ * @author: WillHayCode
  */
 import * as WebSocket from 'websocket';
-import { Client } from './Client';
 import { Message } from './Types';
 
 export class User {
     private id: string;
     private socket: WebSocket.connection;
     private queue: Message[] = [];
-    private client: Client;
     constructor(id: string, socket: WebSocket.connection) {
         this.id = id;
 
@@ -22,15 +20,10 @@ export class User {
             this.socket.removeAllListeners();
         });
 
-        this.client = new Client(this);
     }
 
     public getID(): string {
         return this.id;
-    }
-
-    public getClient(): Client {
-        return this.client;
     }
 
     public send(message: Message): void {

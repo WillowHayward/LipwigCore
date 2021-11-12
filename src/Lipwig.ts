@@ -1,11 +1,10 @@
 /**
- * @author: William Hayward
+ * @author: WillHayCode
  */
 import * as http from 'http';
 import * as https from 'https';
 import * as WebSocket from 'websocket';
 import * as winston from 'winston';
-//import * as wbs from 'winston-better-sqlite3';
 import { EventManager } from 'lipwig-events';
 import { Room } from './Room';
 import { defaultConfig, ErrorCode, LipwigOptions, LipwigConfig, Message, RoomConfig, UserOptions } from './Types';
@@ -26,10 +25,12 @@ class Lipwig extends EventManager {
     constructor(config: LipwigConfig = {}) {
         super();
 
-       const options: LipwigOptions = {
+        const options: LipwigOptions = {
          ...defaultConfig,
          ...config
        }
+
+       const transports = [];
 
         this.logger = winston.createLogger({
           format: winston.format.combine(
@@ -37,11 +38,6 @@ class Lipwig extends EventManager {
             winston.format.json()
           ),
           transports: [
-            /*new wbs({
-              db: options.db,
-              table: 'test'
-            })*/
-            new winston.transports.Console()
           ]
         });
 
@@ -252,12 +248,6 @@ class Lipwig extends EventManager {
 
         const room: Room = new Room(id, connection, options);
         this.rooms[id] = room;
-
-        //if (room.isRemote()) {
-            //const host: Host = room.getRemoteHost();
-            //const creator: Client = room.getRemoteCreator();
-            //this.emit('created', host, creator);
-        //}
 
         return ErrorCode.SUCCESS;
     }
