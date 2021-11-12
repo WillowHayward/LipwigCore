@@ -15,7 +15,7 @@ type RoomMap = {
     [index: string]: Room;
 };
 
-class Lipwig extends EventManager {
+export class Lipwig extends EventManager {
     private logger: winston.Logger;
     private options: LipwigOptions;
     private ws: WebSocket.server;
@@ -235,6 +235,11 @@ class Lipwig extends EventManager {
         return ErrorCode.SUCCESS;
     }
 
+    private admin(connection: WebSocket.connection, message: Message): ErrorCode {
+
+        return ErrorCode.INSUFFICIENTPERMISSIONS;
+    }
+
     private create(connection: WebSocket.connection, message: Message): ErrorCode {
         const options: RoomConfig = <RoomConfig> message.data[0] || {};
         if (typeof options !== 'object') {
@@ -381,5 +386,3 @@ class Lipwig extends EventManager {
       return this.rooms[code];
     }
 }
-
-module.exports = Lipwig;

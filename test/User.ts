@@ -1,10 +1,12 @@
-const Lipwig = require('../lib/Lipwig.js');
-const Stub = require('../lib/Stub.js').Stub;
-
-const config = require('../lib/Types').testConfig;
+import { Lipwig } from '../src/Lipwig';
+import { Stub } from '../src/Stub';
+import {
+    testConfig as config
+} from '../src/Types';
 const url = 'ws://localhost:' + config.port;
+
 describe('User', function() {
-    let lw;
+    let lw: Lipwig;
     before(function(done) {
         lw = new Lipwig(config);
         lw.on('started', function() {
@@ -33,7 +35,7 @@ describe('User', function() {
         return host;
     }
 
-    function join(code) {
+    function join(code: string) {
         const client = new Stub(url);
         client.on('connected', function() {
             const message = {
@@ -51,17 +53,17 @@ describe('User', function() {
     describe('kick', function() {
         it('should kick users', function(done) {
             done();
-            host = create();
-            host.on('created', function(code) {
+            const host = create();
+            host.on('created', function(code: string) {
                 host.id = code;
-                client = join(code);
+                const client = join(code);
 
                 client.on('kicked', function() {
-                    //done();
+                    done();
                 });
             });
 
-            host.on('joined', function(id) {
+            host.on('joined', function(id: string) {
                 const message = {
                     event: 'kick',
                     data: [id, ''],

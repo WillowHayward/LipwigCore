@@ -1,11 +1,14 @@
-const Lipwig = require('../lib/Lipwig.js');
-const Stub = require('../lib/Stub.js').Stub;
+import { Lipwig } from '../src/Lipwig';
+import { Stub } from '../src/Stub';
+import { 
+    ErrorCode,
+    testConfig as config 
+} from '../src/Types';
 
-const config = require('../lib/Types').testConfig;
 const url = 'ws://localhost:' + config.port;
 
-let lw;
 describe('Stub', function() {
+    let lw: Lipwig;
     before(function(done) {
         lw = new Lipwig(config);
         lw.on('started', function() {
@@ -38,7 +41,7 @@ describe('Stub', function() {
             host.send(message);
         });
 
-        host.on('created', function(code) {
+        host.on('created', function() {
             done();
         });
     });
@@ -56,9 +59,9 @@ describe('Stub', function() {
             host.send(message);
         });
 
-        host.on('created', function(code) {
+        host.on('created', function(code: string) {
             const client = new Stub(url);
-            client.on('connected', function(id) {
+            client.on('connected', function(id: string) {
                 const message = {
                     event: 'join',
                     data: [code],
@@ -69,7 +72,7 @@ describe('Stub', function() {
                 client.on('joined', function() {
                     done();
                 });
-                client.on('error', function(code) {
+                client.on('error', function(code: ErrorCode) {
                   done(code);
                 });
             });

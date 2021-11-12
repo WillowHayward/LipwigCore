@@ -12,7 +12,7 @@ type UserMap = {
 
 export class Room {
     private options: RoomOptions;
-    private host: User;
+    protected host: User;
     private users: UserMap;
     private id: string;
     constructor(id: string, host: WebSocketConnection, options: RoomConfig) {

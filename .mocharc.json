@@ -1,0 +1,4 @@
+{
+    "extension": [".ts"],
+    "watch-files": ["./src/**/*.ts"]
+}

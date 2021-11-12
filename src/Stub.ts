@@ -7,6 +7,7 @@ import { EventManager } from 'lipwig-events';
 import { Message, ErrorCode } from './Types';
 
 export class Stub extends EventManager {
+    public id: string = '';
     private socket: WebSocket.connection | null;
     private queue: Message[];
     constructor(url: string) {
